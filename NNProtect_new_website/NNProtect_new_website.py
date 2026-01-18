@@ -42,7 +42,7 @@ from rxconfig import config
 
 from .auth_service.auth_state import AuthState
 
-from database import *
+# Removed wildcard import to fix "Table already exists" warnings
 from database import initialize_database
 from database.users import Users, UserStatus
 import sqlmodel

@@ -92,6 +92,24 @@ class ProductManager:
             return None
 
     @staticmethod
+    def get_product_price_by_country(product: Products, country: Countries) -> Optional[float]:
+        """
+        Obtiene el precio de un producto dado un país (Enum).
+        Optimizado para evitar consultas a BD.
+        """
+        if not country:
+            return None
+            
+        if country == Countries.MEXICO:
+            return product.price_mx
+        elif country == Countries.USA:
+            return product.price_usa
+        elif country == Countries.COLOMBIA:
+            return product.price_colombia
+        else:
+            return None
+
+    @staticmethod
     def get_product_price_by_user(product: Products, user_id: int) -> Optional[float]:
         """
         Obtiene el precio de un producto según el país de registro del usuario.
@@ -111,18 +129,20 @@ class ProductManager:
             return None
         
         country = ProductManager._map_country_string_to_enum(country_str)
+        return ProductManager.get_product_price_by_country(product, country)
+
+    @staticmethod
+    def get_product_pv_by_country(product: Products, country: Countries) -> int:
+        """Obtiene PV dado un país (Enum)."""
         if not country:
-            return None
-        
-        # Obtener precio según país
+            return 0
         if country == Countries.MEXICO:
-            return product.price_mx
+            return product.pv_mx
         elif country == Countries.USA:
-            return product.price_usa
+            return product.pv_usa
         elif country == Countries.COLOMBIA:
-            return product.price_colombia
-        else:
-            return None
+            return product.pv_colombia
+        return 0
 
     @staticmethod
     def get_product_pv_by_user(product: Products, user_id: int) -> int:
@@ -143,18 +163,20 @@ class ProductManager:
             return 0
         
         country = ProductManager._map_country_string_to_enum(country_str)
+        return ProductManager.get_product_pv_by_country(product, country)
+
+    @staticmethod
+    def get_product_vn_by_country(product: Products, country: Countries) -> Optional[float]:
+        """Obtiene VN dado un país (Enum)."""
         if not country:
-            return 0
-        
-        # Obtener PV según país
+            return None
         if country == Countries.MEXICO:
-            return product.pv_mx
+            return product.vn_mx
         elif country == Countries.USA:
-            return product.pv_usa
+            return product.vn_usa
         elif country == Countries.COLOMBIA:
-            return product.pv_colombia
-        else:
-            return 0
+            return product.vn_colombia
+        return None
 
     @staticmethod
     def get_product_vn_by_user(product: Products, user_id: int) -> Optional[float]:
@@ -175,18 +197,20 @@ class ProductManager:
             return None
         
         country = ProductManager._map_country_string_to_enum(country_str)
+        return ProductManager.get_product_vn_by_country(product, country)
+
+    @staticmethod
+    def get_currency_symbol_by_country(country: Countries) -> str:
+        """Obtiene símbolo de moneda dado un país (Enum)."""
         if not country:
-            return None
-        
-        # Obtener VN según país
+            return "$"
         if country == Countries.MEXICO:
-            return product.vn_mx
+            return "MX$"
         elif country == Countries.USA:
-            return product.vn_usa
+            return "$"
         elif country == Countries.COLOMBIA:
-            return product.vn_colombia
-        else:
-            return None
+            return "COP$"
+        return "$"
 
     @staticmethod
     def get_currency_symbol_by_user(user_id: int) -> str:
@@ -207,24 +231,14 @@ class ProductManager:
             return "$"
         
         country = ProductManager._map_country_string_to_enum(country_str)
-        if not country:
-            return "$"
-        
-        # Obtener símbolo de moneda según país
-        if country == Countries.MEXICO:
-            return "MX$"
-        elif country == Countries.USA:
-            return "$"
-        elif country == Countries.COLOMBIA:
-            return "COP$"
-        else:
-            return "$"
+        return ProductManager.get_currency_symbol_by_country(country)
 
     @staticmethod
     def format_product_data_for_store(products: List[Products], user_id: int) -> List[Dict]:
         """
         Formatea los datos de productos para usar en la tienda.
         Aplica principio YAGNI: solo los datos necesarios para la tienda.
+        🚀 OPTIMIZADO: Elimina problema N+1 cargando país UNA sola vez.
         
         Args:
             products: Lista de productos
@@ -233,13 +247,25 @@ class ProductManager:
         Returns:
             List[Dict]: Lista de productos formateados para la tienda
         """
+        from ..auth_service.auth_state import UserDataManager
+        import time
+        start_time = time.time()
+        
         formatted_products = []
         
+        # 🚀 OPTIMIZACIÓN: Cargar país y enum UNA sola vez fuera del bucle
+        # Esto reduce N consultas a BD (donde N = num productos) a 1 consulta.
+        country_str = UserDataManager.get_user_country_by_id(user_id)
+        country_enum = ProductManager._map_country_string_to_enum(country_str)
+        
+        # Pre-calcular el símbolo de moneda
+        currency = ProductManager.get_currency_symbol_by_country(country_enum)
+        
         for product in products:
-            price = ProductManager.get_product_price_by_user(product, user_id)
-            pv = ProductManager.get_product_pv_by_user(product, user_id)
-            vn = ProductManager.get_product_vn_by_user(product, user_id)
-            currency = ProductManager.get_currency_symbol_by_user(user_id)
+            # Usar métodos optimizados que no hacen queries
+            price = ProductManager.get_product_price_by_country(product, country_enum)
+            pv = ProductManager.get_product_pv_by_country(product, country_enum)
+            vn = ProductManager.get_product_vn_by_country(product, country_enum)
             
             # Solo incluir productos que tengan precio definido
             if price is not None:
@@ -257,6 +283,8 @@ class ProductManager:
                     "is_new": product.is_new,  # ✅ Incluir flag para filtrar en memoria
                 })
         
+        total_time = time.time() - start_time
+        print(f"⚡ format_product_data_for_store: {len(products)} productos procesados en {total_time:.4f}s")
         return formatted_products
 
     @staticmethod
