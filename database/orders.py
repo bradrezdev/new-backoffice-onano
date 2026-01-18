@@ -1,5 +1,5 @@
 import reflex as rx
-from sqlmodel import Field, func
+from sqlmodel import SQLModel, Field, func
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -16,12 +16,14 @@ class OrderStatus(Enum):
     REFUNDED = "refunded"                    # Reembolsada
 
 
-class Orders(rx.Model, table=True):
+class Orders(SQLModel, table=True):
     """
     Órdenes de compra mensuales.
     Una orden puede contener múltiples productos (OrderItems).
     Reemplaza completamente la tabla Transactions.
     """
+    id: int | None = Field(default=None, primary_key=True)
+
     # Comprador
     member_id: int = Field(foreign_key="users.member_id", index=True)
 

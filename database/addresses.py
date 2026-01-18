@@ -1,5 +1,5 @@
 import reflex as rx
-from sqlmodel import Field, ForeignKey
+from sqlmodel import SQLModel, Field, ForeignKey
 from enum import Enum
 
 
@@ -11,11 +11,13 @@ class Countries(Enum):
     PUERTO_RICO = "PUERTO_RICO"
 
 
-class Addresses(rx.Model, table=True):
+class Addresses(SQLModel, table=True):
     """
     Tabla de direcciones.
     Contiene información de direcciones asociadas a usuarios.
     """
+    id: int | None = Field(default=None, primary_key=True)
+
     # Información de dirección
     street: str = Field()
     neighborhood: str = Field()

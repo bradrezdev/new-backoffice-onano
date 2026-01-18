@@ -1,12 +1,13 @@
 import reflex as rx
-from sqlmodel import Field, func
+from sqlmodel import SQLModel, Field, func
 from datetime import datetime, date, timezone
 from NNProtect_new_website.utils.timezone_mx import get_mexico_now
 
-class UserRankHistory(rx.Model, table=True):
+class UserRankHistory(SQLModel, table=True):
     """
     Historial de rangos con timestamps en UTC puro.
     """
+    id: int | None = Field(default=None, primary_key=True)
     member_id: int = Field(index=True, foreign_key="users.member_id")
     rank_id: int = Field(default=None, index=True, foreign_key="ranks.id")
 

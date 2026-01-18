@@ -1,5 +1,5 @@
 import reflex as rx
-from sqlmodel import Field, func, Index
+from sqlmodel import SQLModel, Field, func, Index
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -31,7 +31,7 @@ class RewardStatus(Enum):
     DELIVERED = "DELIVERED"         # Ya entregada
 
 
-class LoyaltyPoints(rx.Model, table=True):
+class LoyaltyPoints(SQLModel, table=True):
     """
     Balance de puntos de lealtad por usuario.
     Registro único por usuario (member_id único).
@@ -48,6 +48,9 @@ class LoyaltyPoints(rx.Model, table=True):
         Index('idx_lp_status', 'status'),
         Index('idx_lp_consecutive', 'consecutive_months'),
     )
+
+    id: int | None = Field(default=None, primary_key=True)
+
 
     # Usuario (único)
     member_id: int = Field(foreign_key="users.member_id", unique=True, index=True)
@@ -102,7 +105,7 @@ class LoyaltyPoints(rx.Model, table=True):
         return f"<LoyaltyPoints(member_id={self.member_id}, points={self.current_points}, months={self.consecutive_months}, status={self.status})>"
 
 
-class LoyaltyPointsHistory(rx.Model, table=True):
+class LoyaltyPointsHistory(SQLModel, table=True):
     """
     Historial completo de acumulaciones/reinicios del programa de lealtad.
     Registro inmutable para auditoría.
@@ -115,6 +118,9 @@ class LoyaltyPointsHistory(rx.Model, table=True):
         Index('idx_lph_member_created', 'member_id', 'created_at'),
         Index('idx_lph_event_type', 'event_type'),
     )
+
+    id: int | None = Field(default=None, primary_key=True)
+
 
     # Usuario y período
     member_id: int = Field(foreign_key="users.member_id", index=True)
@@ -145,7 +151,7 @@ class LoyaltyPointsHistory(rx.Model, table=True):
         return f"<LoyaltyPointsHistory(member_id={self.member_id}, event={self.event_type}, change={self.points_change})>"
 
 
-class LoyaltyRewards(rx.Model, table=True):
+class LoyaltyRewards(SQLModel, table=True):
     """
     Registro de recompensas de lealtad entregadas.
     Rastrea qué usuarios han recibido sus regalos físicos.
@@ -157,6 +163,9 @@ class LoyaltyRewards(rx.Model, table=True):
         Index('idx_lr_status', 'status'),
         Index('idx_lr_earned', 'earned_at'),
     )
+
+    id: int | None = Field(default=None, primary_key=True)
+
 
     # Usuario receptor
     member_id: int = Field(foreign_key="users.member_id", index=True)

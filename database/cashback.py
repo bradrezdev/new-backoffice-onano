@@ -1,5 +1,5 @@
 import reflex as rx
-from sqlmodel import Field, func, Index
+from sqlmodel import SQLModel, Field, func, Index
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -11,7 +11,7 @@ class CashbackStatus(Enum):
     EXPIRED = "EXPIRED"        # Expirado (fin de mes)
 
 
-class Cashback(rx.Model, table=True):
+class Cashback(SQLModel, table=True):
     """
     Registro de cashbacks generados y aplicados.
 
@@ -24,6 +24,8 @@ class Cashback(rx.Model, table=True):
     - Envío: NO tiene descuento (se cobra normal)
     """
     __tablename__ = "cashback"
+
+    id: int | None = Field(default=None, primary_key=True)
 
     __table_args__ = (
         Index('idx_cb_member_period', 'member_id', 'period_id'),
@@ -86,12 +88,14 @@ class Cashback(rx.Model, table=True):
         return f"<Cashback(member_id={self.member_id}, discount={self.discount_amount} {self.currency}, status={self.status})>"
 
 
-class CashbackUsage(rx.Model, table=True):
+class CashbackUsage(SQLModel, table=True):
     """
     Detalle de productos comprados con cashback.
     Registra qué productos específicos de una orden utilizaron el descuento del cashback.
     """
     __tablename__ = "cashbackusage"
+
+    id: int | None = Field(default=None, primary_key=True)
 
     __table_args__ = (
         Index('idx_cbu_cashback', 'cashback_id'),

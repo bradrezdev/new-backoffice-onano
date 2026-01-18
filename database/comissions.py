@@ -1,6 +1,6 @@
 import reflex as rx
 from enum import Enum
-from sqlmodel import Field, func
+from sqlmodel import SQLModel, Field, func
 from datetime import datetime, timezone
 
 class BonusType(Enum):
@@ -21,13 +21,14 @@ class CommissionStatus(Enum):
     PAID = "paid"            # Ya pagada
     CANCELLED = "cancelled"  # Cancelada por alguna razón
 
-class Commissions(rx.Model, table=True):
+class Commissions(SQLModel, table=True):
     """
     Registro de todas las comisiones generadas en el sistema.
     Almacena el monto en VN original y el monto convertido a la moneda del receptor.
     """
     
     # Receptor de la comisión
+    id: int | None = Field(default=None, primary_key=True)
     member_id: int = Field(foreign_key="users.member_id", index=True)
     
     # Tipo de bono

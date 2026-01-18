@@ -1,15 +1,16 @@
 import reflex as rx
-from sqlmodel import Field, func
+from sqlmodel import SQLModel, Field, func
 from datetime import datetime, timezone
 
 
-class ExchangeRates(rx.Model, table=True):
+class ExchangeRates(SQLModel, table=True):
     """
     Tasas de cambio fijas establecidas por la compañía.
     Permite cambiar tasas en el futuro sin afectar comisiones pasadas.
     """
 
     # Par de monedas
+    id: int | None = Field(default=None, primary_key=True)
     from_currency: str = Field(max_length=10, index=True)  # COP
     to_currency: str = Field(max_length=10, index=True)    # MXN
 

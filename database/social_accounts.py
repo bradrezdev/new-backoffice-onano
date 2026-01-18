@@ -9,14 +9,13 @@ class SocialNetwork(Enum):
     INSTAGRAM = "instagram"               # Instagram
     X = "x"                               # Twitter (X)
 
-@rx.ModelRegistry.register
 class SocialAccounts(SQLModel, table=True):
     """
     Cuentas sociales vinculadas a usuarios.
     Permite integración con redes sociales y otros proveedores de identidad.
     """
     # Clave primaria
-    socialaccount_id: int = Field(primary_key=True, index=True)
+    socialaccount_id: int | None = Field(default=None, primary_key=True)
 
     # Vinculación con usuario
     user_id: int = Field(foreign_key="users.id")

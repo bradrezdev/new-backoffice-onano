@@ -1,5 +1,5 @@
 import reflex as rx
-from sqlmodel import Field, func, Index, CheckConstraint
+from sqlmodel import SQLModel, Field, func, Index, CheckConstraint
 from datetime import datetime, timezone
 from enum import Enum
 import uuid
@@ -45,7 +45,7 @@ class WithdrawalStatus(Enum):
     REJECTED = "REJECTED"       # Rechazado
 
 
-class Wallets(rx.Model, table=True):
+class Wallets(SQLModel, table=True):
     """
     Billetera virtual por usuario (una por usuario).
     Almacena el balance actual y el estado de la wallet.
@@ -59,6 +59,9 @@ class Wallets(rx.Model, table=True):
         Index('idx_wallet_member', 'member_id'),
         Index('idx_wallet_status', 'status'),
     )
+
+    id: int | None = Field(default=None, primary_key=True)
+
 
     # Usuario (único)
     member_id: int = Field(foreign_key="users.member_id", unique=True, index=True)
@@ -90,7 +93,7 @@ class Wallets(rx.Model, table=True):
         return f"<Wallet(member_id={self.member_id}, balance={self.balance} {self.currency}, status={self.status})>"
 
 
-class WalletTransactions(rx.Model, table=True):
+class WalletTransactions(SQLModel, table=True):
     """
     Registro inmutable de todas las transacciones de billetera.
     CADA transacción debe quedar registrada permanentemente.
@@ -101,6 +104,8 @@ class WalletTransactions(rx.Model, table=True):
     - Auditoría completa: balance_before + balance_after
     """
     __tablename__ = "wallettransactions"
+    
+    id: int | None = Field(default=None, primary_key=True)
 
     __table_args__ = (
         Index('idx_wt_member_type', 'member_id', 'transaction_type'),
@@ -159,7 +164,7 @@ class WalletTransactions(rx.Model, table=True):
         return f"<WalletTransaction(id={self.id}, member_id={self.member_id}, type={self.transaction_type}, amount={self.amount}, status={self.status})>"
 
 
-class WalletWithdrawals(rx.Model, table=True):
+class WalletWithdrawals(SQLModel, table=True):
     """
     Solicitudes de retiro a cuenta bancaria.
     Registra todas las solicitudes de retiro con datos bancarios.
@@ -173,6 +178,9 @@ class WalletWithdrawals(rx.Model, table=True):
         Index('idx_ww_status', 'status'),
         Index('idx_ww_requested', 'requested_at'),
     )
+
+    id: int | None = Field(default=None, primary_key=True)
+
 
     # Usuario
     member_id: int = Field(foreign_key="users.member_id", index=True)

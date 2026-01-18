@@ -1,5 +1,5 @@
 import reflex as rx
-from sqlmodel import Field, func, Index, UniqueConstraint
+from sqlmodel import SQLModel, Field, func, Index, UniqueConstraint
 from datetime import datetime, timezone
 from enum import Enum
 
@@ -18,12 +18,14 @@ class TravelEventType(Enum):
     BONUS = "bonus"                         # Bonificación especial (5 Full Protect)
 
 
-class TravelCampaigns(rx.Model, table=True):
+class TravelCampaigns(SQLModel, table=True):
     """
     Campañas semestrales de NN Travels.
     Cada campaña dura 6 meses y tiene una meta de puntos (default: 200).
     """
     __tablename__ = "travelcampaigns"
+
+    id: int | None = Field(default=None, primary_key=True)
 
     # Identificación de la campaña
     name: str = Field(max_length=100, unique=True, index=True)  # "Campaña 2025-H1"
@@ -57,7 +59,7 @@ class TravelCampaigns(rx.Model, table=True):
         return f"<TravelCampaign(id={self.id}, name='{self.name}', status={self.status})>"
 
 
-class NNTravelPoints(rx.Model, table=True):
+class NNTravelPoints(SQLModel, table=True):
     """
     Acumulación de puntos NN Travel por usuario y campaña.
     Registro único por member_id + campaign_id.
@@ -70,6 +72,8 @@ class NNTravelPoints(rx.Model, table=True):
         Index('idx_nntp_campaign', 'campaign_id'),
         Index('idx_nntp_qualifies', 'qualifies_for_travel'),
     )
+
+    id: int | None = Field(default=None, primary_key=True)
 
     # Usuario y campaña
     member_id: int = Field(foreign_key="users.member_id", index=True)
@@ -114,7 +118,7 @@ class NNTravelPoints(rx.Model, table=True):
         return f"<NNTravelPoints(member_id={self.member_id}, campaign_id={self.campaign_id}, total={self.total_points}, qualifies={self.qualifies_for_travel})>"
 
 
-class NNTravelPointsHistory(rx.Model, table=True):
+class NNTravelPointsHistory(SQLModel, table=True):
     """
     Historial detallado de cada evento que genera puntos NN Travel.
     Registro inmutable para auditoría completa.
@@ -127,6 +131,8 @@ class NNTravelPointsHistory(rx.Model, table=True):
         Index('idx_nntph_member_created', 'member_id', 'created_at'),
         Index('idx_nntph_event_type', 'event_type'),
     )
+
+    id: int | None = Field(default=None, primary_key=True)
 
     # Usuario y campaña
     member_id: int = Field(foreign_key="users.member_id", index=True)

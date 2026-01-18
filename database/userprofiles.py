@@ -8,7 +8,6 @@ class UserGender(Enum):
     MALE = "MALE"                  # Masculino
     FEMALE = "FEMALE"                  # Femenino
 
-@rx.ModelRegistry.register
 class UserProfiles(SQLModel, table=True):
     """
     Perfiles extendidos de usuarios.
