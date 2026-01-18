@@ -16,7 +16,7 @@ def login() -> rx.Component:
                 # Contenedor izquierdo | Formulario
                 rx.vstack(
                     
-                    rx.image(src="/logotipo.png", width="200px", height="auto"),
+                    rx.image(src="/logotipo.png", width="200px", height="200px"),
 
                     # Formulario de inicio de sesión
                     rx.form(

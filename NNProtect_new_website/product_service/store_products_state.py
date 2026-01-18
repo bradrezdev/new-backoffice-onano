@@ -216,6 +216,10 @@ class StoreState(rx.State):
     # Cache maestro de productos (copia local del global)
     _all_products_cache: List[Dict[str, Any]] = []
     _popular_products_cache: List[Dict[str, Any]] = []
+
+    # 🚀 OPTIMIZACIÓN: Categorías pre-calculadas (Buckets)
+    # Evita iterar _all_products_cache 5 veces en cada render.
+    _categorized_products: Dict[str, List[Dict[str, Any]]] = {}
     
     # PRODUCT FEED (INFINITE SCROLL)
     products_feed: List[Dict[str, Any]] = []
@@ -290,6 +294,32 @@ class StoreState(rx.State):
         """ Alias para load_products_cached """
         self.load_products_cached()
     
+    def _categorize_products(self, products: List[Dict[str, Any]]):
+        """
+        Categoriza productos en una sola pasada (O(N)).
+        """
+        import time
+        t0 = time.time()
+        
+        # Reset buckets
+        self._categorized_products = {
+            "kit de inicio": [],
+            "suplemento": [],
+            "skincare": [],
+            "desinfectante": [],
+            "new": []
+        }
+        
+        for p in products:
+            p_type = p.get("type")
+            if p_type in self._categorized_products:
+                self._categorized_products[p_type].append(p)
+            
+            if p.get("is_new") is True:
+                self._categorized_products["new"].append(p)
+                
+        print(f"⚡ Categorización completada en {time.time() - t0:.4f}s")
+
     @rx.event
     def load_products_cached(self):
         """
@@ -306,6 +336,9 @@ class StoreState(rx.State):
         import time
         global _GLOBAL_PRODUCTS_CACHE
         
+        t_start = time.time()
+        print(f"🕒 DEBUG: Inicio load_products_cached - {t_start}")
+        
         current_time = time.time()
         last_update = _GLOBAL_PRODUCTS_CACHE.get("timestamp", 0.0)
         cache_age = current_time - last_update
@@ -315,7 +348,10 @@ class StoreState(rx.State):
             print(f"📦 GLOBAL Cache HIT - Edad: {int(cache_age)}s")
             self._all_products_cache = _GLOBAL_PRODUCTS_CACHE["all_products"]
             self._popular_products_cache = _GLOBAL_PRODUCTS_CACHE["popular_products"]
+            # Categorizar también en cache hit porque _categorized_products es instancia local
+            self._categorize_products(self._all_products_cache)
             self._products_loaded = True
+            print(f"🏁 DEBUG: Fin load_products_cached (HIT) - Total: {time.time() - t_start:.4f}s")
             return
 
         # Cache MISS - Cargar de DB
@@ -323,16 +359,21 @@ class StoreState(rx.State):
         self.error_message = ""
         print(f"🔍 GLOBAL Cache MISS - Cargando productos de DB...")
         
+        t_db_start = time.time()
+        
         try:
             # TODO: Integrar con autenticación real
             self.user_id = 1
             
             # 1. Cargar TODOS los productos (Single Query)
+            # 🚀 format_product_data_for_store ya fue optimizado en ProductManager
             all_products = ProductDataService.get_products_for_store(self.user_id)
+            print(f"📡 DB Query 'All Products' terminada en {time.time() - t_db_start:.4f}s")
             
-            # 2. Cargar populares (Query separada necesaria por joined load compleja)
-            # Podríamos optimizar esto luego trayendo solo IDs, pero por ahora está bien.
+            # 2. Cargar populares
+            t_pop = time.time()
             popular = ProductManager.get_popular_products_formatted(self.user_id, limit=5)
+            print(f"📡 DB Query 'Popular' terminada en {time.time() - t_pop:.4f}s")
             
             # Actualizar Global Cache
             _GLOBAL_PRODUCTS_CACHE["all_products"] = all_products
@@ -342,6 +383,10 @@ class StoreState(rx.State):
             # Actualizar Local State
             self._all_products_cache = all_products
             self._popular_products_cache = popular
+            
+            # Categorizar
+            self._categorize_products(all_products)
+            
             self._products_loaded = True
             
             print(f"✅ Cache Actualizado: {len(all_products)} productos cargados.")
@@ -351,18 +396,19 @@ class StoreState(rx.State):
             print(f"❌ {self.error_message}")
             self._all_products_cache = []
             self._popular_products_cache = []
+            self._categorized_products = {}
             
         finally:
             self.is_loading = False
+            print(f"🏁 DEBUG: Fin load_products_cached (MISS) - Total: {time.time() - t_start:.4f}s")
 
-    # ===================== GETTERS FILTRADOS (IN-MEMORY) =====================
-    # Calculados al vuelo desde _all_products_cache sin tocar la DB
+    # ===================== GETTERS FILTRADOS (Pre-Calculados) =====================
+    # Leen de los buckets O(1) en lugar de filtrar O(N)
 
     @rx.var
     def latest_products(self) -> List[Dict[str, Any]]:
         """Productos nuevos (is_new=True)"""
-        # Filtrar localmente
-        return [p for p in self._all_products_cache if p.get("is_new") is True]
+        return self._categorized_products.get("new", [])
 
     @rx.var
     def popular_products(self) -> List[Dict[str, Any]]:
@@ -372,22 +418,22 @@ class StoreState(rx.State):
     @rx.var
     def kit_inicio_products(self) -> List[Dict[str, Any]]:
         """Productos tipo 'kit de inicio'"""
-        return [p for p in self._all_products_cache if p.get("type") == "kit de inicio"]
+        return self._categorized_products.get("kit de inicio", [])
 
     @rx.var
     def supplement_products(self) -> List[Dict[str, Any]]:
         """Productos tipo 'suplemento'"""
-        return [p for p in self._all_products_cache if p.get("type") == "suplemento"]
+        return self._categorized_products.get("suplemento", [])
 
     @rx.var
     def skincare_products(self) -> List[Dict[str, Any]]:
         """Productos tipo 'skincare'"""
-        return [p for p in self._all_products_cache if p.get("type") == "skincare"]
+        return self._categorized_products.get("skincare", [])
 
     @rx.var
     def sanitize_products(self) -> List[Dict[str, Any]]:
         """Productos tipo 'desinfectante'"""
-        return [p for p in self._all_products_cache if p.get("type") == "desinfectante"]
+        return self._categorized_products.get("desinfectante", [])
 
     @rx.event
     def invalidate_cache(self):
