@@ -9,38 +9,38 @@ from .mlm_service.network_reports import network_reports
 from .mlm_service.income_reports import income_reports
 
 # Auth Service
-from .auth.login import login
-from .auth.new_register import register
-from .auth.register_noSponsor import register_noSponsor
-from .auth.welcome_page import welcome_page
+from .modules.auth.pages.login import login
+from .modules.auth.pages.new_register import register
+from .modules.auth.pages.register_noSponsor import register_noSponsor
+from .modules.auth.pages.welcome_page import welcome_page
 
 # Product Service
-from .product_service.store import store
-from .product_service.shopping_cart import shopping_cart
+from .modules.store.pages.store import store
+from .modules.store.pages.shopping_cart import shopping_cart
 
 # Order Service
-from .order_service.orders import orders
-from .order_service.order_details import order_details
-from .order_service.order_confirmation import order_confirmation
-from .order_service.shipment import shipment_method
+from .modules.store.pages.orders import orders
+from .modules.store.pages.order_details import order_details
+from .modules.store.pages.order_confirmation import order_confirmation
+from .modules.store.pages.shipment import shipment_method
 
 # Finance Service
 from .finance_service.withdrawals import withdrawals
 from .finance_service.new_withdrawal import new_withdrawal
 
 # Payment Service
-from .payment_service.payment import payment
+from .modules.store.pages.payment import payment
 
 # Admin App
 from .Admin_app.admin_page import admin_page
 
 # --- Components ---
-from .shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, header
-from .shared_ui.theme import Custom_theme
+from .components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, header
+from .components.shared_ui.theme import Custom_theme
 from .status_bar import pwa_meta_tags, wrap_page_with_statusbar  # ← NUEVO IMPORT
 from rxconfig import config
 
-from .auth_service.auth_state import AuthState
+from .modules.auth.state.auth_state import AuthState
 
 # Removed wildcard import to fix "Table already exists" warnings
 from database import initialize_database

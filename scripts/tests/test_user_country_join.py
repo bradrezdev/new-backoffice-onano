@@ -9,7 +9,7 @@ sys.path.append('.')
 
 from database.users import Users
 from database.addresses import Countries
-from NNProtect_new_website.auth_service.auth_state import UserDataManager
+from NNProtect_new_website.modules.auth.state.auth_state import UserDataManager
 
 def test_user_country_join():
     """Test del método get_user_country_by_id"""

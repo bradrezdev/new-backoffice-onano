@@ -11,7 +11,7 @@ Verifica:
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
-from NNProtect_new_website.auth_service.auth_state import AuthState
+from NNProtect_new_website.modules.auth.state.auth_state import AuthState
 from database.users import Users
 
 
@@ -38,11 +38,11 @@ class TestAuthenticationFix:
         }
         
         # Mock de Supabase
-        with patch('NNProtect_new_website.auth_service.auth_state.SupabaseAuthManager.sign_in_user') as mock_supabase:
+        with patch('NNProtect_new_website.modules.auth.state.auth_state.SupabaseAuthManager.sign_in_user') as mock_supabase:
             mock_supabase.return_value = (True, "Success", {"id": "supabase-123", "email": "test@example.com"})
             
             # Mock de MLM
-            with patch('NNProtect_new_website.auth_service.auth_state.MLMUserManager.load_complete_user_data') as mock_mlm:
+            with patch('NNProtect_new_website.modules.auth.state.auth_state.MLMUserManager.load_complete_user_data') as mock_mlm:
                 mock_mlm.return_value = mock_user_data
                 
                 # Mock de DB session
@@ -94,7 +94,7 @@ class TestAuthenticationFix:
         test_payload = {"id": 1, "username": "Test User"}
         
         # Mock decode_jwt_token
-        with patch('NNProtect_new_website.auth_service.auth_state.AuthenticationManager.decode_jwt_token') as mock_decode:
+        with patch('NNProtect_new_website.modules.auth.state.auth_state.AuthenticationManager.decode_jwt_token') as mock_decode:
             mock_decode.return_value = test_payload
             
             # Mock DB session
@@ -111,7 +111,7 @@ class TestAuthenticationFix:
                 mock_session.return_value.__enter__.return_value.exec.return_value.first.return_value = mock_user
                 
                 # Mock MLM data
-                with patch('NNProtect_new_website.auth_service.auth_state.MLMUserManager.load_complete_user_data') as mock_mlm:
+                with patch('NNProtect_new_website.modules.auth.state.auth_state.MLMUserManager.load_complete_user_data') as mock_mlm:
                     mock_mlm.return_value = {
                         "id": 1,
                         "member_id": 1,
@@ -137,7 +137,7 @@ class TestAuthenticationFix:
         state.auth_token = ""  # Cookie vacía
         
         # Mock decode_jwt_token para retornar None (token inválido)
-        with patch('NNProtect_new_website.auth_service.auth_state.AuthenticationManager.decode_jwt_token') as mock_decode:
+        with patch('NNProtect_new_website.modules.auth.state.auth_state.AuthenticationManager.decode_jwt_token') as mock_decode:
             mock_decode.return_value = None
             
             # Act

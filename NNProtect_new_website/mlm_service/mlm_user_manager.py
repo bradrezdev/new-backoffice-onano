@@ -520,7 +520,7 @@ class MLMUserManager:
         
         try:
             # ✅ Usar RegistrationManager para convertir país a valor interno
-            from ..auth_service.auth_state import RegistrationManager
+            from ..modules.auth.state.auth_state import RegistrationManager
             country_value = RegistrationManager.get_country_value(country)
             
             if not country_value:

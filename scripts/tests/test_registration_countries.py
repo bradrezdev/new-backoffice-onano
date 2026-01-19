@@ -20,7 +20,7 @@ def test_registration_manager():
     print("🧪 Testing RegistrationManager sin ENUM Countries...")
     
     try:
-        from NNProtect_new_website.auth_service.auth_state import RegistrationManager
+        from NNProtect_new_website.modules.auth.state.auth_state import RegistrationManager
         
         # Test 1: Obtener países disponibles
         print("\n1️⃣ Países disponibles:")
@@ -65,7 +65,7 @@ def test_auth_state_computed_vars():
     print("\n🎯 Testing computed vars de AuthState...")
     
     try:
-        from NNProtect_new_website.auth_service.auth_state import AuthState
+        from NNProtect_new_website.modules.auth.state.auth_state import AuthState
         
         # Crear instancia de estado
         auth_state = AuthState()

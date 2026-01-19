@@ -673,7 +673,7 @@ class AdminState(rx.State):
             display_name = f"{self.new_user_first_name} {self.new_user_last_name}".strip()
             
             print(f"DEBUG: Registrando en Supabase Auth...")
-            from ..auth_service.auth_state import SupabaseAuthManager
+            from NNProtect_new_website.modules.auth.backend.supabase_auth_manager import SupabaseAuthManager
             
             success, message, supabase_user_id = await SupabaseAuthManager.sign_up_user(
                 self.new_user_email, 

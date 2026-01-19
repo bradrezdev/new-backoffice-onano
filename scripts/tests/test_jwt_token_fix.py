@@ -8,7 +8,7 @@ import os
 # Agregar el directorio raíz al path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from NNProtect_new_website.auth_service.auth_state import AuthenticationManager
+from NNProtect_new_website.modules.auth.state.auth_state import AuthenticationManager
 from database.users import Users
 from unittest.mock import Mock
 

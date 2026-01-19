@@ -129,7 +129,7 @@ async def test_websocket_connection_timing():
     diagnostics.log_event("ANALYSIS_3", "Verificando login_user() background=True")
     
     try:
-        from NNProtect_new_website.auth_service.auth_state import AuthState
+        from NNProtect_new_website.modules.auth.state.auth_state import AuthState
         
         # Verificar si login_user tiene background=True
         login_method = getattr(AuthState, 'login_user', None)

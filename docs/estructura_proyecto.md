@@ -2,54 +2,104 @@
 
 **Fecha:** 18 de enero de 2026
 **Autores:** Project Manager Expert, Reflex UI Architect, Python Backend Architect
-**Objetivo:** Limpieza profunda y reestructuración de Arquitectura de Software.
+**Objetivo:** Definir la Arquitectura Modular Estandarizada para todo el sistema.
 
 ---
 
-## 1. Diagnóstico del Estado Actual ("Los Pies y la Cabeza")
+## 1. El Estándar de Oro: "Arquitectura Modular Vertical"
 
-Tras auditar tu espacio de trabajo, hemos llegado a una conclusión clara: **Tu proyecto tiene un núcleo sólido ("Vertical Slice Architecture"), pero está enterrado bajo una capa masiva de desorden administrativo en la raíz.**
+Para evitar confusiones futuras y re-trabajo, hemos definido una **regla inquebrantable** para la estructura de cada módulo. Ya no habrá módulos "simples" o "complejos" con estructuras diferentes. **Todos seguirán el mismo patrón.**
 
-### El Problema Principal: "La Zona de Guerra en la Raíz"
-Actualmente, tu carpeta raíz (`/`) tiene más de **50 archivos sueltos** que mezclan propósitos. Tienes scripts de pruebas (`test_...`), scripts de corrección (`fix_...`), scripts de análisis (`check_...`) y documentación dispersa mezclados con los archivos vitales de arranque. Esto hace imposible saber qué es código en producción y qué es basura de desarrollo.
-
-### El Problema Secundario: Inconsistencia en `NNProtect_new_website/`
-Dentro de la carpeta de la aplicación, hay un intento de organizar por "Servicios" (`ordering`, `mlm`, `finance`), lo cual es **excelente**. Sin embargo, es inconsistente:
-- Tienes una carpeta `auth/` y otra `auth_service/`.
-- Tienes una carpeta `pages/` que está vacía (solo tiene `__init__.py`).
-- Las "Páginas" (UI) están mezcladas dentro de las carpetas de "Servicios". Esto no es malo (es Arquitectura Vertical), pero si no se define una regla clara, se vuelve confuso.
+### ¿Por qué la distinción anterior?
+Originalmente, `auth` se dejó plano porque solo tenía 2 archivos de lógica. `store` se pidió subdivido porque tiene docenas. **Esto fue un error de inconsistencia.** Para tu tranquilidad y orden mental, estandarizaremos todo bajo el modelo de "4 Capas".
 
 ---
 
-## 2. Arquitectura Propuesta: "Reflex Modular Vertical"
+## 2. Estructura de un Módulo Estándar
 
-Para un sistema MLM (Multinivel) que incluye Tienda, Oficina Virtual, Billetera y Administración, la estructura clásica de "Frontend/Backend" no es suficiente.
-
-Hemos diseñado una **Arquitectura Modular Vertical**. En lugar de separar por tipo de archivo (todas las páginas juntas, todos los estados juntos), separaremos por **MÓDULO DE NEGOCIO**.
-
-### Principios
-1.  **Limpieza Radical:** La raíz solo debe tener configuración y arranque.
-2.  **Módulos Autónomos:** Todo lo relacionado con "Tienda" (UI, Estado, Lógica de BD) vive en la carpeta `store`. Todo lo de "Comisiones" vive en `network`.
-3.  **Shared (Compartido):** Solo lo que usan todos (UI base, conexión a DB, utilidades) va a carpetas comunes.
-
----
-
-## 3. Mapa de la Nueva Estructura (Target)
-
-A continuación, el detalle de dónde debe ir cada pieza.
-
-### A. Nivel Raíz (Limpieza Total)
-*Solo deben quedar los archivos esenciales para que el proyecto arranque y se configure.*
+Cada carpeta dentro de `modules/` (**auth, store, network, finance, admin**) DEBE tener estas 4 subcarpetas internas. Si un módulo es pequeño y solo tiene un archivo, igual se respeta la carpeta.
 
 ```text
+modules/
+└── {nombre_del_modulo}/
+    ├── pages/          <-- LA CARA: Archivos UI accesibles por URL.
+    │                       (Ej: store.py, login.py, dashboard.py)
+    │
+    ├── components/     <-- LOS BRAZOS: Partes de UI reusables solo aquí.
+    │                       (Ej: product_card.py, genealogy_node.py)
+    │
+    ├── state/          <-- EL CEREBRO DE UI: Lógica interactiva de Reflex.
+    │                       (Ej: store_state.py, auth_state.py)
+    │
+    └── backend/        <-- EL MOTOR: Lógica pura, DB y cálculos (Sin Reflex).
+                            (Ej: order_service.py, commission_calc.py)
+```
+
+---
+
+## 3. Mapa del Proyecto Completo (Visión Futura Final)
+
+Así es como se verá tu proyecto cuando terminemos la reestructuración. Úsalo como guía para saber dónde poner cada nuevo archivo.
+
+### A. Raíz (Infraestructura)
+```text
 /Users/bradrez/Documents/NNProtect_new_website/
-├── scripts/                 <-- NUEVA: Aquí mueves TODOS los scripts sueltos
-│   ├── tests/               <-- Mover aquí todos los test_*.py
-│   ├── maintenance/         <-- Mover aquí fix_*.py, check_*.py, update_*.py
-│   ├── data_seeding/        <-- Mover aquí create_*.py, seed_*.py
-│   └── analysis/            <-- Mover aquí analyze_*.py, debug_*.py
-├── docs/                    <-- Mover aquí todos los .md (excepto README)
+├── scripts/                 <-- Mantenimiento, Tests, Seeds y Análisis
+├── docs/                    <-- Documentación
 ├── requirements.txt         <-- Dependencias
-├── rxconfig.py              <-- Configuración de Reflex
-├── alembic.ini              <-- Configuración de BBDD
-└── NNProtect_new_website/   <-- EL NÚCLEO DEL PROGRAMA
+├── rxconfig.py              <-- Configuración
+└── NNProtect_new_website/   <-- CÓDIGO FUENTE
+```
+
+### B. Núcleo (`NNProtect_new_website/`)
+
+```text
+/NNProtect_new_website/
+├── NNProtect_new_website.py  <-- Router Principal (App Entry Point)
+├── state.py                  <-- Estado Base (Global)
+│
+├── components/               <-- UI COMPARTIDA (Usada por >1 módulo)
+│   ├── layout.py             (Sidebars, Headers)
+│   ├── theme.py              (Colores, Estilos)
+│   └── tables.py             (Estilos de tablas genéricos)
+│
+├── modules/                  <-- LOS MÓDULOS DE NEGOCIO
+│   │
+│   ├── auth/                 <-- [Módulo de Identidad]
+│   │   ├── pages/            (login.py, register.py, welcome.py)
+│   │   ├── components/       (register_form.py, login_card.py)
+│   │   ├── state/            (auth_state.py)
+│   │   └── backend/          (auth_service.py - Conexión Supabase)
+│   │
+│   ├── store/                <-- [Módulo Comercial]
+│   │   ├── pages/            (store.py, cart.py, orders.py, payment.py)
+│   │   ├── components/       (product_card.py, cart_summary.py)
+│   │   ├── state/            (store_state.py, cart_state.py)
+│   │   └── backend/          (product_queries.py, order_processing.py)
+│   │
+│   ├── network/              <-- [Módulo MLM] (Antes mlm_service)
+│   │   ├── pages/            (tree.py, network_reports.py)
+│   │   ├── components/       (tree_visualizer.py)
+│   │   ├── state/            (network_state.py)
+│   │   └── backend/          (commission_engine.py, tree_logic.py)
+│   │
+│   ├── finance/              <-- [Módulo Financiero]
+│       ├── pages/            (wallet.py, withdrawals.py)
+│       ├── components/       (balance_card.py)
+│       ├── state/            (finance_state.py)
+│       └── backend/          (payout_service.py)
+│
+└── utils/                    <-- HERRAMIENTAS PURAS (Python Helpers)
+    ├── formatters.py
+    └── validators.py
+```
+
+---
+
+## 4. Plan de Acción Actualizado
+
+1.  **Terminar Migración `store`:** Mover todo a las 4 capas (`pages`, `components`, `state`, `backend`).
+2.  **Refactorizar `auth`:** Corregir "el módulo simple" creando las carpetas faltantes (`state`, `backend`) y moviendo los archivos.
+3.  **Migrar `network` y `finance`:** Aplicar este molde exacto.
+
+Esta estructura es "Aburrida" en el buen sentido: es predecible. Nunca tendrás que adivinar dónde va un archivo nuevo.
