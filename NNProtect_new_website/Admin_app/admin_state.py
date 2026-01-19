@@ -24,12 +24,12 @@ from database.usertreepaths import UserTreePath
 from database.users_addresses import UserAddresses
 from database.user_rank_history import UserRankHistory
 
-from NNProtect_new_website.mlm_service.wallet_service import WalletService
-from NNProtect_new_website.mlm_service.loyalty_service import LoyaltyService
-from NNProtect_new_website.mlm_service.exchange_service import ExchangeService
-from NNProtect_new_website.mlm_service.genealogy_service import GenealogyService
-from NNProtect_new_website.mlm_service.rank_service import RankService
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+from NNProtect_new_website.modules.network.backend.loyalty_service import LoyaltyService
+from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
+from NNProtect_new_website.modules.network.backend.genealogy_service import GenealogyService
+from NNProtect_new_website.modules.network.backend.rank_service import RankService
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 
 
 class OrganizationMember(BaseModel):
@@ -673,7 +673,7 @@ class AdminState(rx.State):
             display_name = f"{self.new_user_first_name} {self.new_user_last_name}".strip()
             
             print(f"DEBUG: Registrando en Supabase Auth...")
-            from ..auth_service.auth_state import SupabaseAuthManager
+            from NNProtect_new_website.modules.auth.backend.supabase_auth_manager import SupabaseAuthManager
             
             success, message, supabase_user_id = await SupabaseAuthManager.sign_up_user(
                 self.new_user_email, 
@@ -693,7 +693,7 @@ class AdminState(rx.State):
 
             # ✅ PASO 2: CREAR DATOS MLM (USANDO MLMUserManager COMO auth_state.py)
             print("DEBUG: Creando usuario MLM...")
-            from ..mlm_service.mlm_user_manager import MLMUserManager
+            from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
             
             with rx.session() as session:
                 # Usar el mismo método que auth_state.py
@@ -735,14 +735,14 @@ class AdminState(rx.State):
                         print(f"✅ Dirección creada")
                     
                     # Wallet
-                    from ..mlm_service.wallet_service import WalletService
-                    from ..mlm_service.exchange_service import ExchangeService
+                    from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+                    from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
                     currency = ExchangeService.get_country_currency(self.new_user_country)
                     WalletService.create_wallet(session, new_user.member_id, currency)
                     print(f"✅ Wallet creado con moneda {currency}")
                     
                     # Rango inicial
-                    from ..mlm_service.rank_service import RankService
+                    from NNProtect_new_website.modules.network.backend.rank_service import RankService
                     rank_assigned = RankService.assign_initial_rank(session, new_user.member_id)
                     if rank_assigned:
                         print(f"✅ Rango inicial asignado")
@@ -1022,7 +1022,7 @@ class AdminState(rx.State):
                         
                         # 📊 ACTUALIZAR UNILEVEL_REPORTS (incluye PVG de ancestros y totales)
                         try:
-                            from ..mlm_service.mlm_user_manager import MLMUserManager
+                            from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
                             
                             print(f"  🔄 Actualizando UnilevelReports para member_id={user.member_id}")
                             MLMUserManager.update_unilevel_report_for_order(
@@ -1153,7 +1153,7 @@ class AdminState(rx.State):
                 print(f"DEBUG: Sponsor raíz encontrado: {root_user.first_name} {root_user.last_name}")
 
                 # 🆕 CRÍTICO: Obtener o crear período actual (SIEMPRE necesario para rank_history)
-                from NNProtect_new_website.mlm_service.period_service import PeriodService
+                from NNProtect_new_website.modules.network.backend.period_service import PeriodService
                 current_period = PeriodService.get_current_period(session)
                 if not current_period:
                     print("DEBUG: No hay período actual, creando...")
@@ -1903,8 +1903,8 @@ class AdminState(rx.State):
             from database.engine_config import get_configured_engine
             from database.periods import Periods
             from database.comissions import Commissions, CommissionStatus
-            from NNProtect_new_website.mlm_service.wallet_service import WalletService
-            from NNProtect_new_website.mlm_service.period_reset_service import PeriodResetService
+            from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+            from NNProtect_new_website.modules.network.backend.period_reset_service import PeriodResetService
             
             engine = get_configured_engine()
             

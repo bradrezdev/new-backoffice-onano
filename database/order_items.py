@@ -1,13 +1,14 @@
 import reflex as rx
-from sqlmodel import Field
+from sqlmodel import SQLModel, Field
 
 
-class OrderItems(rx.Model, table=True):
+class OrderItems(SQLModel, table=True):
     """
     Items individuales dentro de una orden.
     Cada línea representa un producto y su cantidad.
     Los valores de precio/PV/VN se congelan al agregar al carrito.
     """
+    id: int | None = Field(default=None, primary_key=True)
     
     # Relaciones
     order_id: int = Field(foreign_key="orders.id", index=True)

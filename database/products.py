@@ -1,6 +1,6 @@
 import reflex as rx
 
-from sqlmodel import Field
+from sqlmodel import SQLModel, Field
 from typing import Optional
 from enum import Enum
 
@@ -20,7 +20,7 @@ class ProductPresentation(Enum):
     SKINCARE = "skincare"
 
 
-class Products(rx.Model, table=True):
+class Products(SQLModel, table=True):
     """
     Modelo de productos del sistema.
     Contiene información de productos con precios y puntos por país.
@@ -34,6 +34,8 @@ class Products(rx.Model, table=True):
     - Precio público por país: public_mx, public_usa, public_colombia
     """
     
+    id: int | None = Field(default=None, primary_key=True)
+
     # Información básica del producto
     product_name: str = Field(max_length=255, nullable=False)
     active_ingredient: str = Field(default=None, max_length=255)

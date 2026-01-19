@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 
 from database.users import Users
 from database.periods import Periods
-from NNProtect_new_website.mlm_service.commission_service import CommissionService
+from NNProtect_new_website.modules.network.backend.commission_service import CommissionService
 from NNProtect_new_website.utils.timezone_mx import get_mexico_now
 
 
@@ -42,8 +42,8 @@ class MonthlyClosureJob:
         """
         try:
             from database.comissions import Commissions, CommissionStatus
-            from NNProtect_new_website.mlm_service.wallet_service import WalletService
-            from NNProtect_new_website.mlm_service.period_reset_service import PeriodResetService
+            from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+            from NNProtect_new_website.modules.network.backend.period_reset_service import PeriodResetService
             
             print("\n" + "="*80)
             print("🔄 INICIANDO CIERRE MENSUAL AUTOMÁTICO")

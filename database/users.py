@@ -1,6 +1,6 @@
 import reflex as rx
 import bcrypt
-from sqlmodel import Field, func, UniqueConstraint
+from sqlmodel import SQLModel, Field, func, UniqueConstraint
 from typing import Optional
 from enum import Enum
 from datetime import datetime, date, timezone
@@ -15,13 +15,15 @@ class UserStatus(Enum):
     QUALIFIED = "QUALIFIED" 
     SUSPENDED = "SUSPENDED"
 
-class Users(rx.Model, table=True):
+class Users(SQLModel, table=True):
     """
     Modelo principal de usuarios con timestamps en UTC puro.
     """
     __table_args__ = (
         UniqueConstraint('member_id', name='uq_users_member_id'),
     )
+    
+    id: int | None = Field(default=None, primary_key=True)
 
     # Vinculo con Supabase Auth - UUID del usuario en auth.users
     supabase_user_id: str | None = Field(default=None, index=True, unique=True)

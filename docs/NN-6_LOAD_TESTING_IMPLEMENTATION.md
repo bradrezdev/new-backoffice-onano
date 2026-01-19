@@ -281,7 +281,7 @@ grep "ya fue procesada" reports/*.log
 ### Código Crítico
 
 - **PaymentService:** `NNProtect_new_website/payment_service/payment_service.py:45-120`
-- **WalletService:** `NNProtect_new_website/mlm_service/wallet_service.py:30-150`
+- **WalletService:** `NNProtect_new_website.modules.finance.backend.wallet_service.py:30-150`
 - **Database Models:** `database/wallet.py`, `database/orders.py`
 
 ### Documentación Externa

@@ -1,12 +1,11 @@
 import reflex as rx
-from sqlmodel import Field, func
+from sqlmodel import Field, SQLModel, func
 from datetime import datetime, timezone
 
-
-class UserAddresses(rx.Model, table=True):
+class UserAddresses(SQLModel, table=True):
     """Direcciones de usuario con timestamps en UTC puro."""
-    user_id: int = Field(foreign_key="users.id")
-    address_id: int = Field(foreign_key="addresses.id")
+    user_id: int = Field(primary_key=True, foreign_key="users.id")
+    address_id: int = Field(primary_key=True, foreign_key="addresses.id")
     address_name: str = Field(default=None, index=True)
     is_default: bool = Field(default=False)
 

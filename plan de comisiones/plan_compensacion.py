@@ -39,9 +39,9 @@ from database.user_rank_history import UserRankHistory
 # from database.loyalty_points import LoyaltyPoints, LoyaltyEventType
 # from database.cashback import CashbackTracking
 
-from NNProtect_new_website.mlm_service.genealogy_service import GenealogyService
-from NNProtect_new_website.mlm_service.exchange_service import ExchangeService
-from NNProtect_new_website.mlm_service.rank_service import RankService
+from NNProtect_new_website.modules.network.backend.genealogy_service import GenealogyService
+from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
+from NNProtect_new_website.modules.network.backend.rank_service import RankService
 
 
 class CompensationPlanV2:
@@ -1108,7 +1108,7 @@ class CompensationPlanV2:
         3. Depositar TODAS las comisiones en billeteras (status=PAID)
         4. Resetear volúmenes (pv_cache, pvg_cache, vn_cache)
         """
-        from NNProtect_new_website.mlm_service.wallet_service import WalletService
+        from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
         
         results = {
             "period_id": period_id,
@@ -1243,7 +1243,7 @@ class CompensationPlanV2:
         Calcula Match desde Uninivel ganado en este período.
         Deposita inmediatamente en billeteras.
         """
-        from NNProtect_new_website.mlm_service.wallet_service import WalletService
+        from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
         
         # Obtener usuarios calificados
         qualified_users = session.exec(

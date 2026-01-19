@@ -1,11 +1,13 @@
 import reflex as rx
-from sqlmodel import Field, ForeignKey
+from sqlmodel import SQLModel, Field, ForeignKey
 
-class UnilevelReports(rx.Model, table=True):
+class UnilevelReports(SQLModel, table=True):
     """
     Tabla de reportes unilevel.
     Contiene información de reportes unilevel asociados a usuarios.
     """
+    id: int | None = Field(default=None, primary_key=True)
+
     # Vinculo con usuario
     user_id: int = Field(foreign_key="users.id", index=True)
 
