@@ -1,9 +1,9 @@
 """Nueva Backoffice NN Protect | Nuevo registro"""
 
 import reflex as rx
-from ..shared_ui.theme import Custom_theme
+from NNProtect_new_website.components.shared_ui.theme import Custom_theme
 from rxconfig import config
-from ..shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar
+from NNProtect_new_website.components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar
 
 def network() -> rx.Component:
     # Welcome Page (Index)

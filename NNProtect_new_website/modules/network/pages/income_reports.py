@@ -1,9 +1,9 @@
 """Nueva Backoffice NN Protect | Reportes de ingresos"""
 
 import reflex as rx
-from ..shared_ui.theme import Custom_theme
+from NNProtect_new_website.components.shared_ui.theme import Custom_theme
 from rxconfig import config
-from ..shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, logged_in_user
+from NNProtect_new_website.components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, logged_in_user
 
 def income_reports() -> rx.Component:
     return rx.center(

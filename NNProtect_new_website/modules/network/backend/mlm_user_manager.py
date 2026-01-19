@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any
 from database.users import Users, UserStatus
 
 # Timezone utilities
-from ..utils.timezone_mx import get_mexico_now, format_mexico_date, format_mexico_datetime, get_mexico_date, get_mexico_datetime_naive
+from NNProtect_new_website.utils.timezone_mx import get_mexico_now, format_mexico_date, format_mexico_datetime, get_mexico_date, get_mexico_datetime_naive
 from datetime import timedelta
 from database.userprofiles import UserProfiles, UserGender
 from database.social_accounts import SocialAccounts, SocialNetwork
@@ -18,7 +18,7 @@ from database.auth_credentials import AuthCredentials
 from database.usertreepaths import UserTreePath
 from database.unilevel_report import UnilevelReports
 from .rank_service import RankService
-from .wallet_service import WalletService
+from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
 import os
 
 class MLMUserManager:

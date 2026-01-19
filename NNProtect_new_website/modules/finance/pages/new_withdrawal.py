@@ -1,9 +1,9 @@
 """Nueva Backoffice NN Protect | Solicitud de retiro"""
 
 import reflex as rx
-from ..shared_ui.theme import Custom_theme
+from ....components.shared_ui.theme import Custom_theme
 from rxconfig import config
-from ..shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, header
+from ....components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, header
 
 def new_withdrawal() -> rx.Component:
     # Welcome Page (Index)

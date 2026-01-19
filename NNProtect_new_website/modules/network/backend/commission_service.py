@@ -18,7 +18,7 @@ from database.periods import Periods
 from database.ranks import Ranks
 from database.usertreepaths import UserTreePath
 from .genealogy_service import GenealogyService
-from .exchange_service import ExchangeService
+from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
 from .rank_service import RankService
 
 

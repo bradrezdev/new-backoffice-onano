@@ -1,11 +1,11 @@
 """Nueva Backoffice NN Protect | Reportes de Red"""
 
 import reflex as rx
-from ..shared_ui.theme import Custom_theme
+from NNProtect_new_website.components.shared_ui.theme import Custom_theme
 from rxconfig import config
-from ..shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, logged_in_user
+from NNProtect_new_website.components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, logged_in_user
 from NNProtect_new_website.modules.auth.state.auth_state import AuthState
-from .mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 from typing import List, Dict, Any
 
 def format_date(date_obj) -> str:

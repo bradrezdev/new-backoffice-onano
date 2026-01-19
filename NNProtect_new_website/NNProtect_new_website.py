@@ -4,9 +4,9 @@ import reflex as rx
 
 # --- Pages ---
 # MLM Service
-from .mlm_service.network import network
-from .mlm_service.network_reports import network_reports
-from .mlm_service.income_reports import income_reports
+from .modules.network.pages.network import network
+from .modules.network.pages.network_reports import network_reports
+from .modules.network.pages.income_reports import income_reports
 
 # Auth Service
 from .modules.auth.pages.login import login
@@ -25,8 +25,8 @@ from .modules.store.pages.order_confirmation import order_confirmation
 from .modules.store.pages.shipment import shipment_method
 
 # Finance Service
-from .finance_service.withdrawals import withdrawals
-from .finance_service.new_withdrawal import new_withdrawal
+from .modules.finance.pages.withdrawals import withdrawals
+from .modules.finance.pages.new_withdrawal import new_withdrawal
 
 # Payment Service
 from .modules.store.pages.payment import payment
