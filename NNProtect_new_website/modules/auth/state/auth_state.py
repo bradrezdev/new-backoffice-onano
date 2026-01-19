@@ -33,7 +33,7 @@ from database.usertreepaths import UserTreePath
 
 # Importar nuevos managers para Supabase
 from ..backend.supabase_auth_manager import SupabaseAuthManager
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 
 
 @dataclass
@@ -56,7 +56,7 @@ class AuthenticationManager:
     @staticmethod
     def get_jwt_secret() -> str:
         """Obtiene la clave JWT según el entorno (Principio DRY)."""
-        from ..utils.environment import Environment
+        from NNProtect_new_website.utils.environment import Environment
         return Environment.get_jwt_secret()
 
     @classmethod
@@ -415,7 +415,7 @@ class RegistrationManager:
     @staticmethod
     def get_base_url() -> str:
         """Obtiene la URL base de la aplicación (Principio DRY)."""
-        from ..utils.environment import Environment
+        from NNProtect_new_website.utils.environment import Environment
         return Environment.get_base_url()
 
     @staticmethod

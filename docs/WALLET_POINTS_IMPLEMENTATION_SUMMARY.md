@@ -73,7 +73,7 @@ Se ha implementado exitosamente el **sistema completo de billetera virtual y pun
 
 ### 2. Servicios de Lógica de Negocio
 
-#### 📄 `NNProtect_new_website/mlm_service/wallet_service.py` (524 líneas)
+#### 📄 `NNProtect_new_website.modules.finance.backend.wallet_service.py` (524 líneas)
 **Clase:** `WalletService`
 
 **Métodos principales:**
@@ -92,7 +92,7 @@ Se ha implementado exitosamente el **sistema completo de billetera virtual y pun
 - ✅ Idempotencia con UUID
 - ✅ Auditoría completa con balance antes/después
 
-#### 📄 `NNProtect_new_website/mlm_service/cashback_service.py` (314 líneas)
+#### 📄 `NNProtect_new_website.modules.network.backend/cashback_service.py` (314 líneas)
 **Clase:** `CashbackService`
 
 **Métodos principales:**
@@ -110,7 +110,7 @@ Se ha implementado exitosamente el **sistema completo de billetera virtual y pun
 - ✅ Envío NO tiene descuento
 - ✅ Expiración automática fin de mes
 
-#### 📄 `NNProtect_new_website/mlm_service/loyalty_service.py` (344 líneas)
+#### 📄 `NNProtect_new_website.modules.network.backend/loyalty_service.py` (344 líneas)
 **Clase:** `LoyaltyService`
 
 **Métodos principales:**
@@ -128,7 +128,7 @@ Se ha implementado exitosamente el **sistema completo de billetera virtual y pun
 - ✅ Reset automático si no compra en ventana
 - ✅ Recompensa al alcanzar 100 puntos
 
-#### 📄 `NNProtect_new_website/mlm_service/travel_points_service.py` (421 líneas)
+#### 📄 `NNProtect_new_website.modules.network.backend/travel_points_service.py` (421 líneas)
 **Clase:** `TravelPointsService`
 
 **Métodos principales:**
@@ -501,7 +501,7 @@ python testers/test_wallet_points_systems.py
 ### Consultar Balance de Wallet
 
 ```python
-from NNProtect_new_website.mlm_service.wallet_service import WalletService
+from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
 
 with rx.session() as session:
     balance = WalletService.get_wallet_balance(session, member_id=1)
@@ -511,7 +511,7 @@ with rx.session() as session:
 ### Verificar Cashback Disponible
 
 ```python
-from NNProtect_new_website.mlm_service.cashback_service import CashbackService
+from NNProtect_new_website.modules.network.backend.cashback_service import CashbackService
 
 with rx.session() as session:
     cashback = CashbackService.get_available_cashback(session, member_id=1)
@@ -522,7 +522,7 @@ with rx.session() as session:
 ### Consultar Puntos de Lealtad
 
 ```python
-from NNProtect_new_website.mlm_service.loyalty_service import LoyaltyService
+from NNProtect_new_website.modules.network.backend.loyalty_service import LoyaltyService
 
 with rx.session() as session:
     summary = LoyaltyService.get_user_loyalty_summary(session, member_id=1)
@@ -532,7 +532,7 @@ with rx.session() as session:
 ### Consultar Puntos NN Travel
 
 ```python
-from NNProtect_new_website.mlm_service.travel_points_service import TravelPointsService
+from NNProtect_new_website.modules.network.backend.travel_points_service import TravelPointsService
 
 with rx.session() as session:
     summary = TravelPointsService.get_user_points_summary(session, member_id=1)

@@ -275,7 +275,7 @@ pytest testers/test_commissions/ -m critical -v
 
 # Con reporte de cobertura
 pytest testers/test_commissions/ \
-  --cov=NNProtect_new_website/mlm_service \
+  --cov=NNProtect_new_website.modules.network.backend \
   --cov-report=html
 
 # Ver reporte

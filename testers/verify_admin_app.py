@@ -94,21 +94,21 @@ def test_services():
     print("="*60)
 
     try:
-        from NNProtect_new_website.mlm_service.wallet_service import WalletService
+        from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
         print("✅ WalletService disponible")
     except Exception as e:
         print(f"❌ Error importando WalletService: {e}")
         return False
 
     try:
-        from NNProtect_new_website.mlm_service.loyalty_service import LoyaltyService
+        from NNProtect_new_website.modules.network.backend.loyalty_service import LoyaltyService
         print("✅ LoyaltyService disponible")
     except Exception as e:
         print(f"❌ Error importando LoyaltyService: {e}")
         return False
 
     try:
-        from NNProtect_new_website.mlm_service.exchange_service import ExchangeService
+        from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
         print("✅ ExchangeService disponible")
     except Exception as e:
         print(f"❌ Error importando ExchangeService: {e}")

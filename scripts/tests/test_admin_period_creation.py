@@ -93,7 +93,7 @@ def test_admin_period_creation():
         print(f"✨ Nuevo período creado: {new_period.name} (ID: {new_period.id})")
         
         # Reiniciar usuarios (como lo hace el admin)
-        from NNProtect_new_website.mlm_service.period_service import PeriodService
+        from NNProtect_new_website.modules.network.backend.period_service import PeriodService
         PeriodService.reset_users_for_new_period(session, new_period)
         
         session.commit()

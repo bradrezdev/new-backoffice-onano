@@ -6,7 +6,7 @@ import reflex as rx
 from typing import List, Dict, Optional, Any
 from database.addresses import Countries
 from ..backend.product_manager import ProductManager, ProductDataService
-from ...auth.auth_state import UserDataManager
+from NNProtect_new_website.modules.auth.state.auth_state import UserDataManager
 
 class SlideToAnyWhere(rx.State):
     """State para deslizar pantalla a cualquier parte de la página."""

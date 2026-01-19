@@ -16,7 +16,7 @@ from database.users import Users
 from database.comissions import Commissions, BonusType
 from database.periods import Periods
 from datetime import datetime, timezone
-from NNProtect_new_website.mlm_service.exchange_service import ExchangeService
+from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
 
 def test_estimated_monthly_earnings():
     """

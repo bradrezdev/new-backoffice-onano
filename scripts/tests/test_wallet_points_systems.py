@@ -23,10 +23,10 @@ from database.travel_campaigns import TravelCampaigns, NNTravelPoints, CampaignS
 from database.comissions import Commissions, CommissionStatus
 from database.periods import Periods
 
-from NNProtect_new_website.mlm_service.wallet_service import WalletService
-from NNProtect_new_website.mlm_service.cashback_service import CashbackService
-from NNProtect_new_website.mlm_service.loyalty_service import LoyaltyService
-from NNProtect_new_website.mlm_service.travel_points_service import TravelPointsService
+from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+from NNProtect_new_website.modules.network.backend.cashback_service import CashbackService
+from NNProtect_new_website.modules.network.backend.loyalty_service import LoyaltyService
+from NNProtect_new_website.modules.network.backend.travel_points_service import TravelPointsService
 
 
 def print_header(title: str):

@@ -8,6 +8,7 @@ from ..state.finance_state import FinanceState
 
 def withdrawals() -> rx.Component:
     # Datos obtenidos del estado
+    withdrawals_data = FinanceState.withdrawals_list
     
     return rx.center(
         rx.desktop_only(
@@ -220,7 +221,7 @@ def withdrawals() -> rx.Component:
                                             ),
                                             
                                             # Monto
-                                        FinanceState.withdrawals_list
+                                            rx.text(
                                                 f"${withdrawal['amount']:.2f}", 
                                                 font_weight="medium", 
                                                 font_size="0.9rem",
@@ -575,5 +576,4 @@ def withdrawals() -> rx.Component:
         bg=rx.color_mode_cond(
             light=Custom_theme().light_colors()["background"],
             dark=Custom_theme().dark_colors()["background"],
-        ),
-    )
+        ),    )

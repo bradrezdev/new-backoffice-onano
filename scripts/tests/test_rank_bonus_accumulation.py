@@ -10,7 +10,7 @@ from database.users import Users
 from database.ranks import Ranks
 from database.comissions import Commissions, BonusType
 from database.periods import Periods
-from NNProtect_new_website.mlm_service.rank_service import RankService
+from NNProtect_new_website.modules.network.backend.rank_service import RankService
 from NNProtect_new_website.utils.timezone_mx import get_mexico_now
 
 print("="*70)
@@ -124,7 +124,7 @@ with rx.session() as session:
         
         expected_bonus_total = 0
         for rank in intermediate_ranks:
-            from NNProtect_new_website.mlm_service.commission_service import CommissionService
+            from NNProtect_new_website.modules.network.backend.commission_service import CommissionService
             bonus_amounts = CommissionService.ACHIEVEMENT_BONUS_AMOUNTS.get(rank.name, {})
             user_currency = "MXN"  # Assuming MX
             amount = bonus_amounts.get(user_currency, 0)

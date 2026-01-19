@@ -49,7 +49,7 @@ import sqlmodel
 from datetime import datetime, timezone
 
 # Importar SchedulerService para tareas automáticas
-from .mlm_service.scheduler_service import SchedulerService
+from .modules.network.backend.scheduler_service import SchedulerService
 
 
 class DashboardState(rx.State):
@@ -225,7 +225,7 @@ class DashboardState(rx.State):
         try:
             from database.comissions import Commissions, BonusType
             from database.periods import Periods
-            from .mlm_service.exchange_service import ExchangeService
+            from .modules.finance.backend.exchange_service import ExchangeService
             
             # Obtener member_id desde AuthState
             auth_state = await self.get_state(AuthState)

@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from database.users import Users
 from database.wallet import Wallets, WalletTransactionType
 from database.periods import Periods
-from NNProtect_new_website.mlm_service.wallet_service import WalletService
+from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
 
 
 def print_header(title: str):

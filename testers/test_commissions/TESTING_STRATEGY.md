@@ -566,7 +566,7 @@ pytest testers/test_commissions/unit/test_fast_start_bonus.py
 pytest testers/test_commissions/ -v
 
 # Ejecutar con coverage report
-pytest testers/test_commissions/ --cov=NNProtect_new_website/mlm_service --cov-report=html
+pytest testers/test_commissions/ --cov=NNProtect_new_website.modules.network.backend --cov-report=html
 
 # Ejecutar tests marcados como críticos
 pytest testers/test_commissions/ -m critical

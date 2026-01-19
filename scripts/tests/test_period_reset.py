@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from database.users import Users, UserStatus
 from database.periods import Periods
 from database.user_rank_history import UserRankHistory
-from NNProtect_new_website.mlm_service.period_service import PeriodService
+from NNProtect_new_website.modules.network.backend.period_service import PeriodService
 
 
 def test_period_reset():

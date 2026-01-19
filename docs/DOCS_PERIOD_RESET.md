@@ -69,7 +69,7 @@ session.add(new_period)
 session.flush()
 
 # ✅ Reiniciar usuarios automáticamente
-from NNProtect_new_website.mlm_service.period_service import PeriodService
+from NNProtect_new_website.modules.network.backend.period_service import PeriodService
 PeriodService.reset_users_for_new_period(session, new_period)
 
 session.commit()
@@ -207,7 +207,7 @@ PeriodService.create_period_for_month(session, 2025, 12)
 
 ## 📚 Archivos Modificados
 
-1. `NNProtect_new_website/mlm_service/period_service.py`
+1. `NNProtect_new_website.modules.network.backend/period_service.py`
    - Agregado: `reset_users_for_new_period()`
    - Modificado: `create_period_for_month()`
 

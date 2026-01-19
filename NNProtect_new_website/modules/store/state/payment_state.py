@@ -9,7 +9,7 @@ from database.order_items import OrderItems
 
 
 from .store_state import CountProducts
-from ...auth.auth_state import AuthState
+from NNProtect_new_website.modules.auth.state.auth_state import AuthState
 from ..backend.payment_service import PaymentService
 
 
@@ -224,7 +224,7 @@ class PaymentState(rx.State):
                         
                         print("\n📊 Paso 7: Actualizando UnilevelReports para usuario y ancestros...")
                         try:
-                            from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+                            from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
                             from database.periods import Periods
                             from sqlmodel import desc
                             

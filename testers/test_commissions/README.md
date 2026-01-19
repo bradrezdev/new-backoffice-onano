@@ -52,7 +52,7 @@ pytest testers/test_commissions/unit/test_direct_bonus.py -v
 pytest testers/test_commissions/ -m critical -v
 
 # Ejecutar con reporte de cobertura
-pytest testers/test_commissions/ --cov=NNProtect_new_website/mlm_service --cov-report=html
+pytest testers/test_commissions/ --cov=NNProtect_new_website.modules.network.backend --cov-report=html
 
 # Ejecutar en paralelo (más rápido)
 pytest testers/test_commissions/ -n auto -v
@@ -211,7 +211,7 @@ pytest testers/test_commissions/unit/test_fast_start_bonus.py::TestFastStartBonu
 
 ```bash
 # Generar reporte HTML
-pytest testers/test_commissions/ --cov=NNProtect_new_website/mlm_service --cov-report=html
+pytest testers/test_commissions/ --cov=NNProtect_new_website.modules.network.backend --cov-report=html
 
 # Ver reporte en navegador
 open htmlcov/index.html

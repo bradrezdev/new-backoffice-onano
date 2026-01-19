@@ -10,7 +10,7 @@ import reflex as rx
 import sqlmodel
 from database.users import Users, UserStatus
 from database.usertreepaths import UserTreePath
-from NNProtect_new_website.mlm_service.genealogy_service import GenealogyService
+from NNProtect_new_website.modules.network.backend.genealogy_service import GenealogyService
 from datetime import datetime, timezone
 
 

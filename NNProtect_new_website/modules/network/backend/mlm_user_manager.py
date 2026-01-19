@@ -17,7 +17,7 @@ from database.roles_users import RolesUsers
 from database.auth_credentials import AuthCredentials
 from database.usertreepaths import UserTreePath
 from database.unilevel_report import UnilevelReports
-from .rank_service import RankService
+from NNProtect_new_website.modules.network.backend.rank_service import RankService
 from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
 import os
 
@@ -520,7 +520,7 @@ class MLMUserManager:
         
         try:
             # ✅ Usar RegistrationManager para convertir país a valor interno
-            from ..modules.auth.state.auth_state import RegistrationManager
+            from NNProtect_new_website.modules.auth.state.auth_state import RegistrationManager
             country_value = RegistrationManager.get_country_value(country)
             
             if not country_value:
@@ -1270,7 +1270,7 @@ class MLMUserManager:
             from database.user_rank_history import UserRankHistory
             from database.ranks import Ranks
             from database.periods import Periods
-            from ..utils.timezone_mx import get_mexico_now
+            from NNProtect_new_website.utils.timezone_mx import get_mexico_now
 
             # Obtener período actual
             now = get_mexico_now()

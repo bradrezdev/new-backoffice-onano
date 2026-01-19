@@ -5,7 +5,7 @@ Test para verificar que los nuevos usuarios tengan el referral_link correcto
 import reflex as rx
 import sqlmodel
 from database.users import Users
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 
 print("\n" + "="*80)
 print("🧪 TEST: Verificar formato de referral_link con get_base_url()")

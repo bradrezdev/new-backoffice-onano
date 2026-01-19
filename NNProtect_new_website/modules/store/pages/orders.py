@@ -373,7 +373,7 @@ def orders() -> rx.Component:
 											width="100%",
 											_focus={"outline": "none"},
 									value=OrderState.search_query,
-									on_change=OrderState.set_search_query
+									on_change=OrderState.search_orders
 										),
 										width="100%",
 										align="center",
@@ -396,8 +396,8 @@ def orders() -> rx.Component:
 									default_value="Todas",
 									radius="large",
 									width="200px",
-									value=OrderState.status_filter,
-									on_change=OrderState.set_status_filter
+									value=OrderState.selected_status,
+									on_change=OrderState.filter_by_status
 								),
 
 								rx.select(
@@ -407,7 +407,7 @@ def orders() -> rx.Component:
 									radius="large",
 									width="200px",
 									value=OrderState.sort_by,
-									on_change=OrderState.set_sort_by
+									on_change=OrderState.sort_orders
 								),
 
 								width="100%",
@@ -430,7 +430,7 @@ def orders() -> rx.Component:
 										)
 									),
 									rx.table.body(
-										rx.foreach(OrderState.filtered_orders, desktop_order_row),
+										rx.foreach(OrderState.orders, desktop_order_row),
 
 										# REFERENCIA: Ejemplo de estructura de datos hardcodeada
 										# rx.table.row(
@@ -489,7 +489,7 @@ def orders() -> rx.Component:
 							# Paginación
 							rx.hstack(
 								rx.text(
-									f"Mostrando {OrderState.current_page_start}-{OrderState.current_page_end} de {OrderState.total_orders} órdenes",
+									f"Mostrando {OrderState.showing_from}-{OrderState.showing_to} de {OrderState.total_orders} órdenes",
 								),
 								rx.spacer(),
 								rx.hstack(
@@ -497,8 +497,8 @@ def orders() -> rx.Component:
 										rx.icon("chevron-left", size=16),
 										"Anterior",
 										variant="soft",
-										disabled=OrderState.is_first_page,
-										on_click=OrderState.prev_page
+										disabled=OrderState.current_page == 1,
+										on_click=OrderState.previous_page
 									),
 									rx.text(
 										f"Página {OrderState.current_page} de {OrderState.total_pages}",
@@ -509,7 +509,7 @@ def orders() -> rx.Component:
 										"Siguiente",
 										rx.icon("chevron-right", size=16),
 										variant="soft",
-										disabled=OrderState.is_last_page,
+										disabled=OrderState.current_page == OrderState.total_pages,
 										on_click=OrderState.next_page
 									),
 									spacing="2"
@@ -556,7 +556,7 @@ def orders() -> rx.Component:
 							dark=Custom_theme().dark_colors()["traslucid-background"]
 						),
 							value=OrderState.search_query,
-							on_change=OrderState.set_search_query
+							on_change=OrderState.search_orders
 					),
 					backdrop_filter="blur(8px)",
 					padding_x="1em",
@@ -582,8 +582,8 @@ def orders() -> rx.Component:
 							size="2",
 							width="48%",
 							radius="full",
-								value=OrderState.status_filter,
-								on_change=OrderState.set_status_filter
+								value=OrderState.selected_status,
+								on_change=OrderState.filter_by_status
 						),
 						rx.select(
 							["Más reciente", "Más antiguo"],
@@ -593,7 +593,7 @@ def orders() -> rx.Component:
 							width="48%",
 							radius="full",
 								value=OrderState.sort_by,
-								on_change=OrderState.set_sort_by
+								on_change=OrderState.sort_orders
 						),
 						justify="between",
 						width="100%",
@@ -602,7 +602,7 @@ def orders() -> rx.Component:
 
 					# Lista de órdenes móvil (cards en lugar de tabla)
 					rx.vstack(
-						rx.foreach(OrderState.filtered_orders, mobile_order_card),
+						rx.foreach(OrderState.orders, mobile_order_card),
 						height="100%",
 						width="100%"
 					),

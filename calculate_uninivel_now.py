@@ -10,7 +10,7 @@ def calculate_uninivel_now():
     from database.periods import Periods
     from database.users import Users
     from NNProtect_new_website.utils.timezone_mx import get_mexico_now
-    from NNProtect_new_website.mlm_service.commission_service import CommissionService
+    from NNProtect_new_website.modules.network.backend.commission_service import CommissionService
     
     print("="*70)
     print("CÁLCULO: Comisiones Uninivel del Período Actual")

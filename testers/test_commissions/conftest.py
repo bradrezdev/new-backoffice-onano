@@ -31,7 +31,7 @@ from database.comissions import Commissions, BonusType
 from database.wallet import Wallets
 from database.exchange_rates import ExchangeRates
 
-from NNProtect_new_website.mlm_service.genealogy_service import GenealogyService
+from NNProtect_new_website.modules.network.backend.genealogy_service import GenealogyService
 
 
 # ==================== DATABASE SETUP ====================

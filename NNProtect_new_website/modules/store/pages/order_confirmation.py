@@ -1,6 +1,6 @@
 import reflex as rx
 
-from ...auth.auth_state import AuthState
+from NNProtect_new_website.modules.auth.state.auth_state import AuthState
 
 from ....components.shared_ui.theme import Custom_theme
 from ....components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, header

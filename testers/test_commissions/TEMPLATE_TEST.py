@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from sqlmodel import select
 
 from database.comissions import Commissions, BonusType
-from NNProtect_new_website.mlm_service.commission_service import CommissionService
+from NNProtect_new_website.modules.network.backend.commission_service import CommissionService
 from testers.test_commissions.helpers.assertions import (
     assert_commission_exists,
     assert_commission_not_exists,

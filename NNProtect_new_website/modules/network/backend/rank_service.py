@@ -16,7 +16,7 @@ from database.user_rank_history import UserRankHistory
 from database.periods import Periods
 from database.orders import Orders, OrderStatus
 from database.usertreepaths import UserTreePath
-from ..utils.timezone_mx import get_mexico_now
+from NNProtect_new_website.utils.timezone_mx import get_mexico_now
 
 
 class RankService:

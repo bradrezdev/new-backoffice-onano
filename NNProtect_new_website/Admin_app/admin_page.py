@@ -5,7 +5,7 @@ Página principal de Admin App con UI minimalista - Diseño mobile mejorado
 import reflex as rx
 from .admin_state import AdminState
 from .components import admin_input, admin_select, admin_button, admin_alert
-from ..shared_ui.theme import Custom_theme
+from NNProtect_new_website.components.shared_ui.theme import Custom_theme
 
 
 def admin_header() -> rx.Component:

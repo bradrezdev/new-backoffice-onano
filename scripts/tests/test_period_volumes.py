@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Script para probar get_period_volumes()"""
 
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 
 # Probar con member_id = 1
 member_id = 1

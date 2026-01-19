@@ -73,7 +73,7 @@
    - Vista mobile: actualizada (líneas ~567-585)
    - on_mount: +1 método
 
-2. NNProtect_new_website/mlm_service/network_reports.py
+2. NNProtect_new_website.modules.network.pages.network_reports.py
    - NetworkReportsState: +2 variables, +1 método async
    - Vista desktop: actualizada (líneas ~475-495)
    - Vista mobile: actualizada (líneas ~875-895)

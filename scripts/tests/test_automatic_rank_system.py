@@ -9,8 +9,8 @@ Prueba los 3 requisitos principales del usuario.
 
 import reflex as rx
 import sqlmodel
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
-from NNProtect_new_website.mlm_service.rank_service import RankService
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.rank_service import RankService
 from database.ranks import Ranks
 from database.user_rank_history import UserRankHistory
 from database.users import Users

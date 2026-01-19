@@ -23,10 +23,10 @@ from database.orders import Orders, OrderStatus
 from database.order_items import OrderItems
 from database.products import Products
 from database.periods import Periods
-from NNProtect_new_website.mlm_service.commission_service import CommissionService
-from NNProtect_new_website.mlm_service.genealogy_service import GenealogyService
-from NNProtect_new_website.mlm_service.rank_service import RankService
-from NNProtect_new_website.mlm_service.pv_update_service import PVUpdateService
+from NNProtect_new_website.modules.network.backend.commission_service import CommissionService
+from NNProtect_new_website.modules.network.backend.genealogy_service import GenealogyService
+from NNProtect_new_website.modules.network.backend.rank_service import RankService
+from NNProtect_new_website.modules.network.backend.pv_update_service import PVUpdateService
 
 
 class TestOrderGenerator:

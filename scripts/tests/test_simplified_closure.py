@@ -15,8 +15,8 @@ def test_simplified_period_closure():
     from database.wallet import Wallets
     from database.users import Users, UserStatus
     from database.user_rank_history import UserRankHistory
-    from NNProtect_new_website.mlm_service.wallet_service import WalletService
-    from NNProtect_new_website.mlm_service.period_reset_service import PeriodResetService
+    from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+    from NNProtect_new_website.modules.network.backend.period_reset_service import PeriodResetService
     
     print("\n" + "="*70)
     print("🧪 TEST: Cierre de Período Simplificado")

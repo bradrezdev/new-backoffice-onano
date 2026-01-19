@@ -7,8 +7,8 @@ from ....components.shared_ui.theme import Custom_theme
 from ....components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, header
 
 # Importaciones para creación de órdenes y pago
-from ....modules.auth.auth_state import AuthState
-from ....modules.store.state.store_state import CountProducts
+from NNProtect_new_website.modules.auth.state.auth_state import AuthState
+from NNProtect_new_website.modules.store.state.store_state import CountProducts
 from ..state.payment_state import PaymentState
 
 

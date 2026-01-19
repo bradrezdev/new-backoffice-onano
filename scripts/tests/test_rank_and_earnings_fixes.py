@@ -20,7 +20,7 @@ from database.users import Users
 from database.user_rank_history import UserRankHistory
 from database.ranks import Ranks
 from database.periods import Periods
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 
 
 def test_rank_and_earnings_fixes():

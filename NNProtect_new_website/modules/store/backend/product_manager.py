@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 from database.products import Products
 from database.addresses import Countries
 
-from ...auth.auth_state import UserDataManager
+from NNProtect_new_website.modules.auth.state.auth_state import UserDataManager
 
 class ProductManager:
     """

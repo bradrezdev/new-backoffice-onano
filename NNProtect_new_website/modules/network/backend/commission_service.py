@@ -698,7 +698,7 @@ class CommissionService:
 
             # 4. Validación especial: Rango Emprendedor (máximo 30 días)
             if new_rank_name == "Emprendedor":
-                from ..utils.timezone_mx import get_mexico_now
+                from NNProtect_new_website.utils.timezone_mx import get_mexico_now
                 days_since_registration = (get_mexico_now() - user.created_at).days
 
                 if days_since_registration > 30:
@@ -751,7 +751,7 @@ class CommissionService:
         Principio DRY: Método reutilizable.
         """
         try:
-            from ..utils.timezone_mx import get_mexico_now
+            from NNProtect_new_website.utils.timezone_mx import get_mexico_now
             current_date = get_mexico_now()
 
             current_period = session.exec(

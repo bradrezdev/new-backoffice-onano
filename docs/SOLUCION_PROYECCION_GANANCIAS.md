@@ -14,7 +14,7 @@
 
 ### Solución 1: Bonos Acumulativos por Rango
 
-**Archivo modificado**: `NNProtect_new_website/mlm_service/rank_service.py`
+**Archivo modificado**: `NNProtect_new_website.modules.network.backend/rank_service.py`
 **Método**: `promote_user_rank()`
 
 **Cambio**: Ahora cuando un usuario es promovido a un nuevo rango, el sistema:
@@ -81,7 +81,7 @@ Este script:
 
 ```python
 # En tu código o en un script
-from NNProtect_new_website.mlm_service.commission_service import CommissionService
+from NNProtect_new_website.modules.network.backend.commission_service import CommissionService
 
 with rx.session() as session:
     # Procesar Uninivel para todas las órdenes del período

@@ -61,7 +61,7 @@ current_period = None
 if self.network_create_orders:
     # ... obtener productos
     # Obtener período actual
-    from NNProtect_new_website.mlm_service.period_service import PeriodService
+    from NNProtect_new_website.modules.network.backend.period_service import PeriodService
     current_period = PeriodService.get_current_period(session)
     if not current_period:
         current_period = PeriodService.auto_create_current_month_period(session)
@@ -70,7 +70,7 @@ if self.network_create_orders:
 **Después:**
 ```python
 # 🆕 CRÍTICO: Obtener o crear período actual (SIEMPRE necesario para rank_history)
-from NNProtect_new_website.mlm_service.period_service import PeriodService
+from NNProtect_new_website.modules.network.backend.period_service import PeriodService
 current_period = PeriodService.get_current_period(session)
 if not current_period:
     print("DEBUG: No hay período actual, creando...")

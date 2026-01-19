@@ -16,7 +16,7 @@ from database.usertreepaths import UserTreePath
 from database.wallet import Wallets, WalletStatus
 from database.user_rank_history import UserRankHistory
 from database.ranks import Ranks
-from NNProtect_new_website.mlm_service.period_service import PeriodService
+from NNProtect_new_website.modules.network.backend.period_service import PeriodService
 
 
 def create_test_user_with_network_logic(

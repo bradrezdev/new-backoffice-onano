@@ -13,7 +13,7 @@ from calendar import monthrange
 from database.periods import Periods
 from database.users import Users, UserStatus
 from database.user_rank_history import UserRankHistory
-from ..utils.timezone_mx import get_mexico_now
+from NNProtect_new_website.utils.timezone_mx import get_mexico_now
 
 
 class PeriodService:

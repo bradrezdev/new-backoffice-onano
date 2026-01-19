@@ -8,7 +8,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import reflex as rx
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 from database.users import Users
 from database.usertreepaths import UserTreePath
 import sqlmodel

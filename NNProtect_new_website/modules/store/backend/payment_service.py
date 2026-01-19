@@ -11,10 +11,10 @@ from datetime import datetime, timezone
 
 from database.orders import Orders, OrderStatus
 from database.wallet import Wallets
-from ..mlm_service.wallet_service import WalletService
-from ..mlm_service.pv_update_service import PVUpdateService
-from ..mlm_service.commission_service import CommissionService
-from ..mlm_service.period_service import PeriodService
+from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+from NNProtect_new_website.modules.network.backend.pv_update_service import PVUpdateService
+from NNProtect_new_website.modules.network.backend.commission_service import CommissionService
+from NNProtect_new_website.modules.network.backend.period_service import PeriodService
 
 
 class PaymentService:
@@ -312,7 +312,7 @@ class PaymentService:
             from database.users import Users
             from database.ranks import Ranks
             from database.user_rank_history import UserRankHistory
-            from ..mlm_service.exchange_service import ExchangeService
+            from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
             
             # Porcentajes del Bono Uninivel por rango
             UNILEVEL_BONUS_PERCENTAGES = {
@@ -476,7 +476,7 @@ class PaymentService:
             from database.users import Users
             from database.ranks import Ranks
             from database.user_rank_history import UserRankHistory
-            from ..mlm_service.exchange_service import ExchangeService
+            from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
             
             # Porcentajes del Bono Matching por rango
             MATCHING_BONUS_PERCENTAGES = {

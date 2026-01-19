@@ -11,7 +11,7 @@ from database.ranks import Ranks
 from database.comissions import Commissions, BonusType
 from database.user_rank_history import UserRankHistory
 from database.periods import Periods
-from NNProtect_new_website.mlm_service.exchange_service import ExchangeService
+from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
 
 print("="*70)
 print("ANÁLISIS DETALLADO: Usuario member_id=1")

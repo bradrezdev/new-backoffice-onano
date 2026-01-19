@@ -10,7 +10,7 @@ def create_new_period_and_reset():
     from database.comissions import Commissions, BonusType, CommissionStatus
     from database.users import Users, UserStatus
     from database.user_rank_history import UserRankHistory
-    from NNProtect_new_website.mlm_service.period_reset_service import PeriodResetService
+    from NNProtect_new_website.modules.network.backend.period_reset_service import PeriodResetService
     
     print("\n" + "="*70)
     print("🚀 CREAR NUEVO PERÍODO Y RESETEAR SISTEMA")

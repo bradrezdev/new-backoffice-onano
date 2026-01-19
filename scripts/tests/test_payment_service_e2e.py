@@ -42,7 +42,7 @@ from database.usertreepaths import UserTreePath
 
 # Importar servicios
 from NNProtect_new_website.payment_service.payment_service import PaymentService
-from NNProtect_new_website.mlm_service.period_service import PeriodService
+from NNProtect_new_website.modules.network.backend.period_service import PeriodService
 
 # Database connection
 from NNProtect_new_website.utils.environment import Environment

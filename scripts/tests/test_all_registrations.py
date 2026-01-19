@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Script para diagnosticar por qué get_all_registrations retorna 0"""
 
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 
 # Probar con member_id = 1 (como en tu SQL)
 member_id = 1

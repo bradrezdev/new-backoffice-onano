@@ -73,7 +73,7 @@ SQL expression element or literal value expected, got Users(...)
 Modificado `commission_service.py` línea 148 para usar `sponsor_user.member_id` en lugar de tratar el objeto Users como int.
 
 **Archivo Modificado:**
-`NNProtect_new_website/mlm_service/commission_service.py` (líneas 147-199)
+`NNProtect_new_website.modules.network.backend/commission_service.py` (líneas 147-199)
 
 ---
 

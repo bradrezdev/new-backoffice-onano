@@ -62,7 +62,7 @@ def test_create_small_network():
         
         with rx.session() as session:
             # Obtener período actual
-            from NNProtect_new_website.mlm_service.period_service import PeriodService
+            from NNProtect_new_website.modules.network.backend.period_service import PeriodService
             current_period = PeriodService.get_current_period(session)
             
             if not current_period:

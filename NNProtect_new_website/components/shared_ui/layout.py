@@ -1,7 +1,7 @@
 import reflex as rx
 from .theme import Custom_theme
 from NNProtect_new_website.modules.auth.state.auth_state import AuthState
-from ..product_service.store_products_state import CountProducts
+from NNProtect_new_website.modules.store.state.store_state import CountProducts
 
 ############################################
 # --- Componente links + cuenta activa --- #

@@ -56,7 +56,7 @@ case $TEST_MODE in
         ;;
     coverage)
         echo -e "${GREEN}Modo: Con Reporte de Cobertura${NC}"
-        PYTEST_ARGS="-v --cov=NNProtect_new_website/mlm_service --cov-report=html --cov-report=term"
+        PYTEST_ARGS="-v --cov=NNProtect_new_website.modules.network.backend --cov-report=html --cov-report=term"
         ;;
     parallel)
         echo -e "${GREEN}Modo: Ejecución Paralela${NC}"

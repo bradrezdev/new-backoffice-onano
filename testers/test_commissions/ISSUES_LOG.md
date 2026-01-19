@@ -189,13 +189,13 @@ Si se inicia el sistema sin un período activo, las comisiones fallan porque `pe
 **Solución Propuesta**:
 1. Crear período actual manualmente:
 ```python
-from NNProtect_new_website.mlm_service.period_service import PeriodService
+from NNProtect_new_website.modules.network.backend.period_service import PeriodService
 PeriodService.create_monthly_period(year=2025, month=10)
 ```
 
 2. O activar scheduler automático:
 ```python
-from NNProtect_new_website.mlm_service.scheduler_service import SchedulerService
+from NNProtect_new_website.modules.network.backend.scheduler_service import SchedulerService
 SchedulerService.start_scheduler()
 ```
 
@@ -240,7 +240,7 @@ No hay generación automática de reportes de cobertura en CI/CD.
 ```bash
 # Agregar a pipeline CI/CD
 pytest testers/test_commissions/ \
-  --cov=NNProtect_new_website/mlm_service \
+  --cov=NNProtect_new_website.modules.network.backend \
   --cov-report=html \
   --cov-report=xml \
   --cov-fail-under=90

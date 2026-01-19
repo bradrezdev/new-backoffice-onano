@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import reflex as rx
 from datetime import datetime, timezone
 from NNProtect_new_website.payment_service.payment_service import PaymentService
-from NNProtect_new_website.mlm_service.wallet_service import WalletService
-from NNProtect_new_website.mlm_service.rank_service import RankService
-from NNProtect_new_website.mlm_service.genealogy_service import GenealogyService
+from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
+from NNProtect_new_website.modules.network.backend.rank_service import RankService
+from NNProtect_new_website.modules.network.backend.genealogy_service import GenealogyService
 from database.users import Users
 from database.orders import Orders, OrderStatus
 from database.order_items import OrderItems

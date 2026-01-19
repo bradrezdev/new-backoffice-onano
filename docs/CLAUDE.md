@@ -340,7 +340,7 @@ Directorio: `database/`
 
 ## 5️⃣ SERVICIO MULTINIVEL (MLM)
 
-**Directorio:** `NNProtect_new_website/mlm_service/`
+**Directorio:** `NNProtect_new_website.modules.network.backend/`
 **Estado:** ✅ 85% IMPLEMENTADO (Core funcional, bonos avanzados faltantes)
 
 ### Archivos Clave Implementados

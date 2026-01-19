@@ -16,7 +16,7 @@ from database.usertreepaths import UserTreePath
 from database.user_rank_history import UserRankHistory
 from database.periods import Periods
 from database.ranks import Ranks
-from NNProtect_new_website.mlm_service.mlm_user_manager import MLMUserManager
+from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
 
 print("\n" + "="*80)
 print("🧪 TEST FINAL: Verificar referral_link en usuarios de red")

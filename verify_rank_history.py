@@ -82,7 +82,7 @@ with Session(engine) as session:
     print(f"   Rangos alcanzados: {', '.join(sorted(rangos_en_historial))}")
     
     # Verificar cuáles tienen bono pagado
-    from NNProtect_new_website.mlm_service.exchange_service import ExchangeService
+    from NNProtect_new_website.modules.finance.backend.exchange_service import ExchangeService
     
     print(f"\n   Estado de bonos por rango:")
     bonos_esperados_total = 0

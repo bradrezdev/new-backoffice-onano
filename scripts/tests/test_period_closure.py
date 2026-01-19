@@ -9,7 +9,7 @@ def test_period_closure():
     from database.periods import Periods
     from database.comissions import Commissions, CommissionStatus
     from database.wallet import Wallets
-    from NNProtect_new_website.mlm_service.wallet_service import WalletService
+    from NNProtect_new_website.modules.finance.backend.wallet_service import WalletService
     
     print("\n" + "="*70)
     print("🧪 TEST: Cierre de Período y Pago de Comisiones")
