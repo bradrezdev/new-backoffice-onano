@@ -467,5 +467,5 @@ def payment() -> rx.Component:
         width="100%",
         
         # 🔐 Cargar datos de autenticación al montar la página
-        on_mount=[AuthState.load_user_from_token],
+        on_mount=[],
     )

@@ -31,10 +31,13 @@ from database.addresses import Addresses
 from database.users_addresses import UserAddresses
 from database.usertreepaths import UserTreePath
 
-# Importar nuevos managers para Supabase
+# Importar nuevos managers
 from ..backend.supabase_auth_manager import SupabaseAuthManager
+from ..backend.auth_service import AuthService
+from ..backend.user_data_service import UserDataService
 from NNProtect_new_website.modules.network.backend.mlm_user_manager import MLMUserManager
-
+from NNProtect_new_website.modules.network.backend.sponsor_service import SponsorService
+from NNProtect_new_website.utils.environment import Environment
 
 @dataclass
 class UserData:
@@ -48,249 +51,6 @@ class UserData:
     last_name: str = ""
     referral_link: str = ""
     profile_name: str = ""
-
-
-class AuthenticationManager:
-    """Maneja operaciones de autenticación y JWT."""
-    
-    @staticmethod
-    def get_jwt_secret() -> str:
-        """Obtiene la clave JWT según el entorno (Principio DRY)."""
-        from NNProtect_new_website.utils.environment import Environment
-        return Environment.get_jwt_secret()
-
-    @classmethod
-    def create_jwt_token(cls, user: Users) -> str:
-        """Crea un JWT token para el usuario autenticado."""
-        try:
-            jwt_secret_key = cls.get_jwt_secret()
-            print(f"🔑 Secret key para encode (primeros 20 chars): {jwt_secret_key[:20]}...")
-            
-            user_id = int(user.id) if user.id is not None else 0
-            username = f"{user.first_name} {user.last_name}".strip() if user.first_name else "unknown"
-            
-            # Convertir datetime a timestamp Unix (segundos desde epoch)
-            exp_datetime = get_mexico_now() + datetime.timedelta(minutes=60)
-            exp_timestamp = int(exp_datetime.timestamp())
-            
-            login_token = {
-                "id": user_id,
-                "username": username,
-                "exp": exp_timestamp,  # ✅ Unix timestamp en lugar de datetime
-            }
-            
-            print(f"📦 Payload a encodear: {login_token}")
-            
-            token = jwt.encode(login_token, jwt_secret_key, algorithm="HS256")
-            
-            if isinstance(token, bytes):
-                token_str = token.decode('utf-8')
-            else:
-                token_str = str(token)
-            
-            print(f"✅ Token generado (primeros 50 chars): {token_str[:50]}...")
-            return token_str
-            
-        except Exception as e:
-            print(f"🔥 Error generando token JWT: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            raise Exception(f"Error generando token JWT: {str(e)}")
-
-    @classmethod
-    def decode_jwt_token(cls, token: str) -> Dict[str, Any]:
-        """Decodifica el JWT token para obtener los datos del usuario."""
-        if not token or "." not in token:
-            print(f"🔴 decode_jwt_token: Token vacío o inválido (sin puntos)")
-            return {}
-            
-        try:
-            jwt_secret_key = cls.get_jwt_secret()
-            print(f"🔑 Secret key para decode (primeros 20 chars): {jwt_secret_key[:20]}...")
-            decoded = jwt.decode(token, jwt_secret_key, algorithms=["HS256"])
-            print(f"✅ Token decodificado exitosamente: {decoded}")
-            return decoded
-            
-        except jwt.ExpiredSignatureError:
-            print(f"⏰ Token expirado (ExpiredSignatureError)")
-            return {}
-        except Exception as e:
-            print(f"🔥 Error decodificando token: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return {}
-
-    @staticmethod
-    def hash_password(password: str) -> str:
-        """Genera hash de contraseña usando bcrypt."""
-        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-    @staticmethod
-    def verify_password(password: str, hashed: str) -> bool:
-        """Verifica contraseña contra su hash."""
-        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-
-
-class SponsorManager:
-    """Maneja operaciones relacionadas con sponsors."""
-    
-    @staticmethod
-    def validate_sponsor_by_member_id(member_id: int) -> bool:
-        """Verifica si existe un usuario con el member_id dado."""
-        if member_id <= 0:
-            return False
-        
-        try:
-            with rx.session() as session:
-                sponsor = session.exec(
-                    sqlmodel.select(Users).where(Users.member_id == member_id)
-                ).first()
-                return sponsor is not None
-        except Exception as e:
-            print(f"DEBUG: Error validando sponsor: {e}")
-            return False
-
-    @staticmethod
-    def get_user_id_by_member_id(member_id: int) -> Optional[int]:
-        """Convierte member_id a user.id para operaciones de BD."""
-        try:
-            with rx.session() as session:
-                user = session.exec(
-                    sqlmodel.select(Users).where(Users.member_id == member_id)
-                ).first()
-                return user.id if user else None
-        except Exception as e:
-            print(f"DEBUG: Error obteniendo user_id: {e}")
-            return None
-
-    @staticmethod
-    def get_sponsor_display_name(member_id: int) -> str:
-        """Obtiene el nombre para mostrar del sponsor."""
-        if member_id <= 0:
-            return "⚠️ Sin sponsor válido"
-        
-        try:
-            with rx.session() as session:
-                sponsor = session.exec(
-                    sqlmodel.select(Users).where(Users.member_id == member_id)
-                ).first()
-                if sponsor:
-                    return f"{sponsor.first_name or ''} {sponsor.last_name or ''}".strip() or f"Member-{sponsor.member_id}"
-        except Exception as e:
-            print(f"DEBUG: Error obteniendo nombre sponsor: {e}")
-        
-        return "Sponsor desconocido"
-
-
-class UserDataManager:
-    """Maneja operaciones de datos de usuario."""
-    
-    @staticmethod
-    def extract_first_word(text: str) -> str:
-        """Extrae la primera palabra de un texto."""
-        if not text:
-            return ""
-        
-        clean_text = str(text).strip()
-        words = clean_text.split()
-        return words[0] if words else ""
-
-    @classmethod
-    def build_profile_name(cls, first_name: str, last_name: str, username: str) -> str:
-        """Construye el nombre de perfil usando solo las primeras palabras."""
-        first_word = cls.extract_first_word(first_name)
-        last_word = cls.extract_first_word(last_name)
-        
-        if first_word and last_word:
-            return f"{first_word} {last_word}"
-        elif first_word:
-            return first_word
-        elif last_word:
-            return last_word
-        else:
-            return username
-
-    @staticmethod
-    def load_user_profile_data(user_id: int) -> Dict[str, Any]:
-        """Carga datos completos del perfil de usuario."""
-        try:
-            with rx.session() as session:
-                # Implementación simplificada por ahora
-                return {"user_id": user_id, "loaded": True}
-                
-        except Exception as e:
-            print(f"DEBUG: Error cargando perfil: {e}")
-            return {}
-    
-    @staticmethod
-    def get_user_country_by_id(user_id: int) -> Optional[str]:
-        """
-        Obtiene el país de registro del usuario mediante JOIN con addresses.
-        
-        Args:
-            user_id: ID del usuario
-            
-        Returns:
-            Countries: País del usuario o None si no se encuentra
-        """
-        try:
-            with rx.session() as session:
-                # Obtener las direcciones del usuario
-                from sqlmodel import select
-                from database.users_addresses import UserAddresses
-                from database.addresses import Addresses
-                
-                # Primero obtener la dirección default del usuario
-                user_address_stmt = select(UserAddresses).where(
-                    UserAddresses.user_id == user_id,
-                    UserAddresses.is_default == True
-                )
-                user_address = session.exec(user_address_stmt).first()
-                
-                if user_address:
-                    # Obtener la dirección completa
-                    address_stmt = select(Addresses).where(
-                        Addresses.id == user_address.address_id
-                    )
-                    address = session.exec(address_stmt).first()
-                    
-                    if address:
-                        return address.country
-                        
-                return None
-                
-        except Exception as e:
-            print(f"DEBUG: Error obteniendo país del usuario {user_id}: {e}")
-            return None
-    
-    @staticmethod
-    def update_user_country_cache(user_id: int) -> bool:
-        """
-        Actualiza el country_cache del usuario con su país de registro.
-        
-        Args:
-            user_id: ID del usuario a actualizar
-            
-        Returns:
-            bool: True si se actualizó correctamente, False en caso de error
-        """
-        try:
-            country = UserDataManager.get_user_country_by_id(user_id)
-            if country:
-                with rx.session() as session:
-                    # Buscar el usuario actual y actualizar su country_cache
-                    user = session.get(Users, user_id)
-                    if user:
-                        user.country_cache = country
-                        session.add(user)
-                        session.commit()
-                        session.refresh(user)
-                        return True
-            return False
-            
-        except Exception as e:
-            print(f"DEBUG: Error actualizando country_cache para usuario {user_id}: {e}")
-            return False
 
 
 class PasswordValidator:
@@ -440,7 +200,7 @@ class RegistrationManager:
     @staticmethod
     def create_auth_credentials(session, user_id: int, password: str, terms_accepted: bool):
         """Crea credenciales de autenticación."""
-        hashed_password = AuthenticationManager.hash_password(password)
+        hashed_password = AuthService.hash_password(password)
         
         new_credentials = AuthCredentials(
             user_id=user_id,
@@ -537,8 +297,9 @@ class AuthState(rx.State):
     error_message: str = ""
     is_logged_in: bool = False
     
-    # Token de autenticación
-    auth_token: str = rx.Cookie(name="auth_token", secure=True, same_site="Lax")
+    # Secure=True solo en producción para evitar problemas en localhost/Safari.
+    # Corrigiendo definición de cookie para evitar SyntaxError y argumentos no soportados
+    auth_token: str = rx.Cookie("")
     
     # Datos de usuario
     logged_user_data: dict = {}
@@ -613,13 +374,13 @@ class AuthState(rx.State):
         if self.profile_data.get("member_id") == self.potential_sponsor_id:
             return self.profile_data.get("profile_name", "Usuario con datos")
         
-        return SponsorManager.get_sponsor_display_name(self.potential_sponsor_id)
+        return SponsorService.get_sponsor_display_name(self.potential_sponsor_id)
 
     @rx.var
     def can_register(self) -> bool:
         """Indica si se puede proceder con el registro."""
         return (self.potential_sponsor_id > 0 and 
-                SponsorManager.validate_sponsor_by_member_id(self.potential_sponsor_id))
+                SponsorService.validate_sponsor_by_member_id(self.potential_sponsor_id))
 
     @rx.var
     def get_user_display_name(self) -> str:
@@ -857,7 +618,7 @@ class AuthState(rx.State):
                         return
                     
                     # Generar token JWT
-                    token = AuthenticationManager.create_jwt_token(user)
+                    token = AuthService.create_jwt_token(user)
                 
                 t_after_jwt = time.time()
                 jwt_time = t_after_jwt - t_before_jwt
@@ -885,6 +646,17 @@ class AuthState(rx.State):
                     print(f"✅ Token guardado en cookie (primeros 50 chars): {token[:50]}...")
                     print(f"✅ is_logged_in establecido a: {self.is_logged_in}")
                     print(f"✅ profile_data keys: {list(self.profile_data.keys())}")
+                    
+                    
+                    # 🔧 SAFARI FIX: Forzar escritura de cookie mediante JS
+                    # Safari y algunos navegadores pueden no persistir rx.Cookie inmediatamente en recargas
+                    yield rx.call_script(f"""
+                        (function() {{
+                            var isSecure = window.location.protocol === 'https:';
+                            document.cookie = "auth_token={token}; path=/; samesite=lax; max-age=86400" + (isSecure ? "; secure" : "");
+                            console.log('🍪 Cookie auth_token forzada via JS (Safari fix)');
+                        }})();
+                    """)
                     
                     self.is_loading = False
                     yield rx.redirect("/dashboard")
@@ -1098,7 +870,7 @@ class AuthState(rx.State):
                 ref_param = current_url.split("?ref=")[1].split("&")[0]
                 try:
                     potential_member_id = int(ref_param)
-                    if SponsorManager.validate_sponsor_by_member_id(potential_member_id):
+                    if SponsorService.validate_sponsor_by_member_id(potential_member_id):
                         self.potential_sponsor_id = potential_member_id
                         print(f"DEBUG: Sponsor capturado desde URL - Member ID: {potential_member_id}")
                         return
@@ -1110,7 +882,7 @@ class AuthState(rx.State):
         # Fallback: usuario con datos disponibles
         if self.profile_data.get("member_id"):
             sponsor_member_id = self.profile_data["member_id"]
-            if SponsorManager.validate_sponsor_by_member_id(sponsor_member_id):
+            if SponsorService.validate_sponsor_by_member_id(sponsor_member_id):
                 self.potential_sponsor_id = sponsor_member_id
                 print(f"DEBUG: Sponsor desde profile_data - Member ID: {self.potential_sponsor_id}")
                 return
@@ -1123,49 +895,40 @@ class AuthState(rx.State):
     @rx.event
     def load_user_from_token(self):
         """Carga datos del usuario desde token."""
-        print("\n" + "="*80)
-        print("🔐 LOAD_USER_FROM_TOKEN EJECUTÁNDOSE")
-        print("="*80)
-        print(f"📍 Contexto: Página cargando, verificando autenticación desde cookie")
-        print(f"🍪 Token en cookie: {self.auth_token[:50] if self.auth_token else 'VACÍO'}...")
-        
-        payload = AuthenticationManager.decode_jwt_token(self.auth_token)
-        print(f"🔓 Payload decodificado: {payload}")
-        
-        if not payload:
-            print("❌ ERROR: No hay payload válido - token inválido o expirado")
+        # Se elimina el logging ruidoso. Si no hay token, simplemente retornamos sin error.
+        if not self.auth_token:
             self.is_logged_in = False
             self.logged_user_data = {}
-            print("="*80 + "\n")
+            return
+
+        payload = AuthService.decode_jwt_token(self.auth_token)
+        
+        if not payload:
+            print("AUTH DEBUG: Token inválido o expirado en load_user_from_token")
+            self.is_logged_in = False
+            self.logged_user_data = {}
             return
 
         user_id = payload.get("id")
-        print(f"🆔 User ID extraído del token: {user_id}")
         
         if not user_id:
-            print("❌ ERROR: No hay user_id en el payload")
-            print("="*80 + "\n")
+            print("AUTH DEBUG: No user_id en token")
             return
 
         try:
-            print(f"🔍 Buscando usuario con ID {user_id} en BD...")
             with rx.session() as session:
                 user = session.exec(
                     sqlmodel.select(Users).where(Users.id == user_id)
                 ).first()
 
                 if not user:
-                    print(f"❌ ERROR: Usuario con ID {user_id} no encontrado en BD")
+                    print(f"AUTH DEBUG: Usuario ID {user_id} no encontrado en BD")
                     self.is_logged_in = False
                     self.logged_user_data = {}
                     self.profile_data = {}
-                    print("="*80 + "\n")
                     return
 
-                print(f"✅ Usuario encontrado: {user.first_name} {user.last_name} (Member ID: {user.member_id})")
-                
                 self.is_logged_in = True
-                print(f"🔓 is_logged_in establecido a: {self.is_logged_in}")
                 
                 self.logged_user_data = {
                     "id": user.id,
@@ -1174,38 +937,23 @@ class AuthState(rx.State):
                     "member_id": user.member_id,
                     "status": user.status.value if hasattr(user.status, 'value') else str(user.status),
                 }
-                print(f"👤 logged_user_data cargado: {self.logged_user_data}")
 
                 # Cargar datos completos del perfil incluyendo rangos y datos MLM
-                print(f"📋 Supabase User ID: {user.supabase_user_id}")
                 if user.supabase_user_id:
-                    print(f"🔄 Cargando datos MLM completos...")
                     complete_data = MLMUserManager.load_complete_user_data(user.supabase_user_id)
                     if complete_data:
                         self.profile_data = complete_data
-                        print(f"✅ profile_data cargado con datos MLM: {list(complete_data.keys())}")
                     else:
-                        print(f"⚠️  No se pudieron cargar datos MLM, usando fallback")
                         # Fallback: cargar datos básicos manualmente
                         self.profile_data = self._build_basic_profile_data(session, user)
-                        print(f"✅ profile_data cargado con fallback: {list(self.profile_data.keys())}")
                 else:
-                    print(f"⚠️  Usuario sin supabase_user_id, usando fallback")
                     # Fallback para usuarios sin supabase_user_id
                     self.profile_data = self._build_basic_profile_data(session, user)
-                    print(f"✅ profile_data cargado con fallback: {list(self.profile_data.keys())}")
-                
-                print(f"\n🎯 RESULTADO FINAL:")
-                print(f"   • is_logged_in: {self.is_logged_in}")
-                print(f"   • member_id: {self.logged_user_data.get('member_id')}")
-                print(f"   • profile_data keys: {list(self.profile_data.keys()) if self.profile_data else 'VACÍO'}")
-                print("="*80 + "\n")
 
         except Exception as e:
             print(f"❌ EXCEPTION en load_user_from_token: {e}")
             import traceback
             traceback.print_exc()
-            print("="*80 + "\n")
 
     def _build_basic_profile_data(self, session, user: Users) -> dict:
         """Construye datos básicos del perfil cuando no hay supabase_user_id."""
@@ -1238,6 +986,58 @@ class AuthState(rx.State):
             self.logged_user_data = {}
 
     @rx.event
+    async def ensure_logged_in(self):
+        """
+        MIDDLEWARE DE PROTECCIÓN DE RUTAS
+        Verifica que el usuario esté autenticado antes de cargar una página protegida.
+        Si la validación falla, redirige al login.
+        """
+        # 1. Verificar existencia del token
+        if not self.auth_token:
+            print("🚫 Acceso denegado: No hay token. Redirigiendo a Login.")
+            return rx.redirect("/")
+            
+        # 2. Verificar validez del token (firma y expiración)
+        payload = AuthService.decode_jwt_token(self.auth_token)
+        if not payload:
+            print("🚫 Acceso denegado: Token inválido o expirado. Redirigiendo a Login.")
+            # Limpieza básica
+            self.auth_token = ""
+            self.is_logged_in = False
+            return rx.redirect("/")
+            
+        # 3. Asegurar que los datos del usuario estén cargados en estado
+        if not self.is_logged_in:
+            self.load_user_from_token()
+            # Si después de intentar cargar, sigue sin estar logueado (ej. usuario borrado de DB)
+            if not self.is_logged_in:
+                print("🚫 Acceso denegado: Usuario no encontrado en DB. Redirigiendo a Login.")
+                return rx.redirect("/")
+                
+        # 4. (Opcional) Verificar roles si se requiere
+        # ...
+        
+        print(f"✅ Acceso autorizado a ruta protegida para el usuario {self.logged_user_data.get('email', 'Unknown')}")
+
+    async def ensure_not_logged_in(self):
+        """
+        MIDDLEWARE DE PROTECCIÓN DE RUTAS GUEST-ONLY
+        Verifica que el usuario NO esté autenticado antes de cargar páginas como login/registro.
+        Si ya está logueado, redirige al dashboard.
+        """
+        # 1. Verificar existencia del token
+        if self.auth_token:
+            # 2. Verificar validez del token
+            payload = AuthService.decode_jwt_token(self.auth_token)
+            if payload:
+                print("🚫 Usuario ya autenticado. Redirigiendo a Dashboard.")
+                return rx.redirect("/dashboard")
+            else:
+                # Token existía pero era inválido, limpiamos
+                self.auth_token = ""
+                self.is_logged_in = False
+
+    @rx.event
     async def logout_user(self):
         """
         NUEVO: Logout híbrido Supabase + MLM.
@@ -1250,6 +1050,11 @@ class AuthState(rx.State):
             success = SupabaseAuthManager.sign_out_user()
             if success:
                 print("✅ Logout de Supabase completado")
+                # 🔧 SAFARI FIX: Forzar limpieza de cookie via JS
+                yield rx.call_script("""
+                    document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+                    console.log('🍪 Cookie auth_token limpiada via JS');
+                """)
             else:
                 print("⚠️ No se pudo hacer logout de Supabase")
         except Exception as e:
@@ -1263,7 +1068,7 @@ class AuthState(rx.State):
         self.profile_data = {}
         
         print("🎉 Logout híbrido completado")
-        return rx.redirect("/", replace=True)
+        yield rx.redirect("/", replace=True)
 
     @rx.event
     def clear_login_form(self):
@@ -1277,8 +1082,8 @@ class AuthState(rx.State):
     @rx.event
     def random_username(self):
         """Genera nombre de usuario aleatorio sin caracteres especiales."""
-        first_part = UserDataManager.extract_first_word(self.new_user_firstname)
-        last_part = UserDataManager.extract_first_word(self.new_user_lastname)
+        first_part = UserDataService.extract_first_word(self.new_user_firstname)
+        last_part = UserDataService.extract_first_word(self.new_user_lastname)
         
         # Sanitizar nombres - solo alfanuméricos
         first_sanitized = re.sub(r'[^a-zA-Z0-9]', '', first_part)

@@ -8,12 +8,12 @@
 
 class JWTCookieManager {
     constructor() {
-        this.cookieName = 'nnprotect_auth_token';
+        this.cookieName = 'auth_token'; // Unificado con AuthState
         this.cookieOptions = {
             path: '/',
             secure: window.location.protocol === 'https:',
-            sameSite: 'strict',
-            maxAge: 300  // 5 minutos en segundos
+            sameSite: 'lax', // Lax es mas compatible con navegacion
+            maxAge: 86400  // 24 horas
         };
     }
 
