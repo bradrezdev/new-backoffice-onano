@@ -4,6 +4,7 @@ import reflex as rx
 from ....components.shared_ui.theme import Custom_theme
 from rxconfig import config
 from ....components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, header
+from ..state.finance_state import FinanceState
 
 def new_withdrawal() -> rx.Component:
     # Welcome Page (Index)
@@ -66,7 +67,7 @@ def new_withdrawal() -> rx.Component:
                                                     spacing="2"
                                                 ),
                                                 rx.text(
-                                                    "$2,450.00 USD",
+                                                    f"${FinanceState.balance} {FinanceState.currency}",
                                                     font_size="1.5rem",
                                                     font_weight="bold",
                                                     color=Custom_theme().light_colors()["primary"]
@@ -94,10 +95,11 @@ def new_withdrawal() -> rx.Component:
                                                 spacing="2"
                                             ),
                                             rx.input(
+                                                value=FinanceState.amount_to_withdraw,
+                                                on_change=FinanceState.set_amount_to_withdraw,
                                                 placeholder="0.00",
                                                 type="number",
                                                 min="10",
-                                                max="2450",
                                                 step="0.01",
                                                 padding="16px",
                                                 border_radius="12px",
@@ -123,29 +125,40 @@ def new_withdrawal() -> rx.Component:
                                             spacing="2"
                                         ),
                                         
-                                        # Método de retiro
+                                        # Datos bancarios
                                         rx.vstack(
                                             rx.hstack(
                                                 rx.icon("credit-card", size=16, color=Custom_theme().light_colors()["primary"]),
-                                                rx.text("Método de retiro *", font_size="1rem", font_weight="semibold"),
+                                                rx.text("Datos Bancarios *", font_size="1rem", font_weight="semibold"),
                                                 align="center",
                                                 spacing="2"
                                             ),
-                                            rx.select(
-                                                ["🏦 Cuenta bancaria - Banco Santander ****1234", 
-                                                 "🏦 Cuenta bancaria - BBVA ****5678", 
-                                                 "💳 PayPal - usuario@email.com",
-                                                 "🪙 Cuenta crypto - Bitcoin",
-                                                 "➕ Agregar nuevo método"],
-                                                placeholder="Seleccione un método de retiro",
-                                                size="3",
+                                            rx.input(
+                                                value=FinanceState.bank_name,
+                                                on_change=FinanceState.set_bank_name,
+                                                placeholder="Nombre del Banco",
                                                 padding="16px",
                                                 border_radius="12px",
                                                 border=f"1px solid {Custom_theme().light_colors()['border']}",
-                                                _focus={
-                                                    "border": f"2px solid {Custom_theme().light_colors()['primary']}"
-                                                },
-                                                height="50px"
+                                                width="100%"
+                                            ),
+                                            rx.input(
+                                                value=FinanceState.account_number,
+                                                on_change=FinanceState.set_account_number,
+                                                placeholder="Número de Cuenta",
+                                                padding="16px",
+                                                border_radius="12px",
+                                                border=f"1px solid {Custom_theme().light_colors()['border']}",
+                                                width="100%"
+                                            ),
+                                            rx.input(
+                                                value=FinanceState.account_holder_name,
+                                                on_change=FinanceState.set_account_holder_name,
+                                                placeholder="Nombre del Titular",
+                                                padding="16px",
+                                                border_radius="12px",
+                                                border=f"1px solid {Custom_theme().light_colors()['border']}",
+                                                width="100%"
                                             ),
                                             width="100%",
                                             margin_bottom="1.5em",
@@ -192,6 +205,7 @@ def new_withdrawal() -> rx.Component:
                                             rx.button(
                                                 rx.icon("send", size=16),
                                                 "Enviar solicitud",
+                                                on_click=FinanceState.submit_withdrawal,
                                                 bg=Custom_theme().light_colors()["primary"],
                                                 color="white",
                                                 size="3",
@@ -559,12 +573,16 @@ def new_withdrawal() -> rx.Component:
                         spacing="2",
                         width="100%"
                     ),
-
-                    # Propiedades del vstack principal móvil
-                    width="100%",
-                    padding="16px",
                 ),
+                # Propiedades del box que envuelve el formulario
+                bg=rx.color_mode_cond(
+                    light=Custom_theme().light_colors()["background"],
+                    dark=Custom_theme().dark_colors()["background"],
+                ), 
+                padding="16px",
+                width="100%"
             ),
+            spacing="4",
             width="100%",
         ),
         width="100%",
@@ -572,4 +590,5 @@ def new_withdrawal() -> rx.Component:
             light=Custom_theme().light_colors()["background"],
             dark=Custom_theme().dark_colors()["background"],
         ),
+        on_mount=FinanceState.on_load,
     )
