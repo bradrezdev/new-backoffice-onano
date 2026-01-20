@@ -6,6 +6,7 @@ import reflex as rx
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timezone
 from ..backend.order_service import OrderService
+from ...auth.state.auth_state import AuthState
 
 
 class OrderState(rx.State):
@@ -85,17 +86,33 @@ class OrderState(rx.State):
         return min(max_item, self.total_orders)
 
     @rx.event
-    def on_load(self):
+    async def on_load(self):
         """
         Evento que se ejecuta al cargar la página.
         Carga las órdenes del usuario automáticamente.
         """
-        # TODO: Obtener member_id del AuthState
-        # Por ahora usar usuario de prueba
-        if self.user_member_id is None:
-            self.user_member_id = 1  # Usuario de prueba
+        # Obtener estado de autenticación
+        auth_state = await self.get_state(AuthState)
 
-        self.load_orders()
+        if auth_state.is_logged_in and auth_state.logged_user_data:
+            self.user_member_id = auth_state.logged_user_data.get("member_id")
+            
+            if self.user_member_id:
+                print(f"✅ OrderState inicializado para member_id={self.user_member_id}")
+                self.load_orders()
+            else:
+                self.error_message = "No se encontró ID de miembro en sesión"
+                print("⚠️ logged_user_data no tiene member_id")
+        else:
+            # Fallback para pruebas si no hay usuario real (temporal)
+            # self.user_member_id = 1
+            # self.load_orders()
+            # print("⚠️ Usando ID 1 temporal para pruebas en OrderState")
+            
+            print("⚠️ Usuario no logueado en OrderState")
+            self.error_message = "Debes iniciar sesión para ver tus órdenes"
+            # Opcional: Redirigir a login
+            # return rx.redirect("/login")
 
     @rx.event
     def load_orders(self):
@@ -182,8 +199,8 @@ class OrderState(rx.State):
 
         # Mapeo de estados UI -> BD
         status_map = {
-            "Pendiente": ["draft", "pending_payment"],
-            "En proceso": ["payment_confirmed", "processing"],
+            "Pendiente de pago": ["draft", "pending_payment"],
+            "Pagado / En proceso": ["payment_confirmed", "processing"],
             "Enviado": ["shipped"],
             "Entregado": ["delivered"],
             "Cancelado": ["cancelled", "refunded"]

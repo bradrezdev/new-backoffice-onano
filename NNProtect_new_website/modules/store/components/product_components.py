@@ -28,7 +28,11 @@ def plusminus_buttons(product_id: int):
             on_click=CountProducts.decrement(product_id)  # ✅ CORREGIDO: sin lambda
         ),
         rx.text(
-            CountProducts.get_count_reactive.get(str(product_id), 0),
+            rx.cond(
+                CountProducts.get_count_reactive.contains(product_id.to_string()),
+                CountProducts.get_count_reactive[product_id.to_string()],
+                0
+            ),
             font_size="0.9rem",
             font_weight="bold",
             min_width="40px",
@@ -870,7 +874,11 @@ def product_card_desktop(product_data: Dict) -> rx.Component:
                 on_click=CountProducts.decrement(product_data.get("id", 1))
             ),
             rx.text(
-                CountProducts.get_count_reactive.get(str(product_data.get("id", 1)), 0),
+                rx.cond(
+                    CountProducts.get_count_reactive.contains(product_data.get("id", 1).to_string()),
+                    CountProducts.get_count_reactive[product_data.get("id", 1).to_string()],
+                    0
+                ),
                 font_size="1rem", 
                 margin_x="0.5em"
             ),

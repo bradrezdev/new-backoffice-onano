@@ -311,4 +311,5 @@ def shopping_cart() -> rx.Component:
         ),
         position="absolute",
         width="100%",
+        on_mount=CountProducts.check_cart_access
     )

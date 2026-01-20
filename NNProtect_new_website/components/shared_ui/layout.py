@@ -361,38 +361,37 @@ def mobile_header():
                     variant="ghost",
                     radius="full",
                 ),
-                rx.link(
-                    rx.button(
-                        rx.cond(
-                            CountProducts.cart_total > 0,
-                            rx.box(
-                                rx.text(CountProducts.cart_total, color="white", font_size="0.8em", font_weight="bold", margin="0"),
-                                bg="red",
-                                border="1px solid white",
-                                border_radius="36px",
-                                width="21px",
-                                height="content",
-                                align="center",
-                                justify="center",
-                                padding="2px",
-                                position="absolute",
-                                top="6px",
-                                right="6px",
-                                z_index="1",
-                            )
-                        ),
-                        rx.icon(
+                rx.button(
+                    rx.cond(
+                        CountProducts.cart_total > 0,
+                        rx.box(
+                            rx.text(CountProducts.cart_total, color="white", font_size="0.8em", font_weight="bold", margin="0"),
+                            bg="red",
+                            border="1px solid white",
+                            border_radius="36px",
+                            width="21px",
+                            height="content",
+                            align="center",
+                            justify="center",
+                            padding="2px",
+                            position="absolute",
+                            top="6px",
+                            right="6px",
+                            z_index="1",
+                        )
+                    ),
+                    rx.icon(
                         "shopping-cart",
                         color=rx.color_mode_cond(
                             light=Custom_theme().light_colors()["text"],
                             dark=Custom_theme().dark_colors()["text"]
                         ),
                         size=24
-                        ),
-                        variant="ghost",
-                        radius="full",
                     ),
-                    href="/shopping_cart",
+                    variant="ghost",
+                    radius="full",
+                    disabled=CountProducts.cart_total == 0,
+                    on_click=rx.redirect("/shopping_cart")
                 ),
                 padding="0 16px",
                 spacing="4",

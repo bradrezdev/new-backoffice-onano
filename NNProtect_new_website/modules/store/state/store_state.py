@@ -5,23 +5,19 @@ Maneja la carga y visualización de productos con precios por país.
 import reflex as rx
 from typing import List, Dict, Optional, Any
 from database.addresses import Countries
-from ..backend.product_manager import ProductManager, ProductDataService
+from ..backend.product_manager import ProductManager
 from NNProtect_new_website.modules.auth.backend.user_data_service import UserDataService
 
 class SlideToAnyWhere(rx.State):
     """State para deslizar pantalla a cualquier parte de la página."""
 
-    def scroll_to_suplements(self):
-        """Deslizar a la sección de suplementos."""
-        return rx.call_script("document.getElementById('suplementos').scrollIntoView({behavior: 'smooth'})")
+    def scroll_to(self, element_id: str):
+        """Deslizar a una sección específica."""
+        return rx.call_script(f"document.getElementById('{element_id}').scrollIntoView({{behavior: 'smooth'}})")
     
-    def scroll_to_skin_care(self):
-        """Deslizar a la sección de cuidado de la piel."""
-        return rx.call_script("document.getElementById('cuidado_piel').scrollIntoView({behavior: 'smooth'})")
-
-    def scroll_to_disinfectants(self):
-        """Deslizar a la sección de desinfectantes."""
-        return rx.call_script("document.getElementById('desinfectantes').scrollIntoView({behavior: 'smooth'})")
+    def scroll_to_suplements(self): return self.scroll_to('suplementos')
+    def scroll_to_skin_care(self): return self.scroll_to('cuidado_piel')
+    def scroll_to_disinfectants(self): return self.scroll_to('desinfectantes')
 
 class CountProducts(rx.State):
     """
@@ -96,7 +92,7 @@ class CountProducts(rx.State):
         self.cart_total = 0
         self.cart_items = {}
 
-    @rx.var(cache=True, auto_deps=False)
+    @rx.var
     def cart_items_detailed(self) -> List[Dict[str, Any]]:
         """
         Propiedad computada que devuelve los productos del carrito con información completa.
@@ -105,8 +101,15 @@ class CountProducts(rx.State):
         if not self.cart_items:
             return []
             
-        from ..backend.product_manager import ProductManager
+        # 🚀 OPTIMIZACIÓN: Cargar país y mapear Enum UNA sola vez fuera del bucle (N+1 Fix)
+        country_str = UserDataService.get_user_country_by_id(self.user_id)
+        country_enum = ProductManager._map_country_string_to_enum(country_str)
         
+        # Fallback de seguridad: Si no se detecta país (ej. usuario nuevo sin dirección), usar MÉXICO por defecto
+        # Esto previene que el carrito salga vacío con items "invisibles" (bug reportado)
+        if not country_enum:
+            country_enum = Countries.MEXICO
+
         cart_items = []
         
         for product_id_str, quantity in self.cart_items.items():
@@ -117,9 +120,9 @@ class CountProducts(rx.State):
             if not product:
                 continue
                 
-            # Obtener precio y puntos según país del usuario
-            price = ProductManager.get_product_price_by_user(product, self.user_id)
-            volume_points = ProductManager.get_product_pv_by_user(product, self.user_id)
+            # Obtener precio y puntos usando el Enum ya cargado
+            price = ProductManager.get_product_price_by_country(product, country_enum)
+            volume_points = ProductManager.get_product_pv_by_country(product, country_enum)
             
             if price is None:
                 continue
@@ -167,6 +170,12 @@ class CountProducts(rx.State):
         return self.cart_subtotal + self.cart_shipping_cost
 
     @rx.event
+    def check_cart_access(self):
+        """Verifica si el acceso al carrito es permitido"""
+        if self.cart_total <= 0:
+            return rx.redirect("/store")
+
+    @rx.event
     def increment_cart_item(self, product_id: int):
         """Incrementa cantidad de un producto específico en el carrito"""
         key = str(product_id)
@@ -193,6 +202,10 @@ class CountProducts(rx.State):
             self.cart_total -= 1
         elif key not in self.cart_items:
             pass
+            
+        # Verificar si el carrito quedó vacío -> Redirigir a tienda
+        if self.cart_total <= 0:
+            return rx.redirect("/store")
     
     @rx.event
     def remove_from_cart(self, product_id: int):
@@ -203,6 +216,10 @@ class CountProducts(rx.State):
             removed_quantity = self.cart_items[key]
             del self.cart_items[key]
             self.cart_total -= removed_quantity
+
+        # Verificar si el carrito quedó vacío -> Redirigir a tienda
+        if self.cart_total <= 0:
+            return rx.redirect("/store")
 
 # ===================== CACHE GLOBAL (Fuera de la clase para persistencia) =====================
 # Cache compartido entre todas las instancias del State (funciona en producción)
@@ -242,7 +259,9 @@ class StoreState(rx.State):
     feed_has_more: bool = True
     is_loading_feed: bool = False
     
-    _products_loaded: bool = False
+    # Check de carga inicial
+    products_loaded: bool = False
+    skeleton_list: List[int] = list(range(8))
 
     # País del usuario para mostrar precios correctos
     user_id: int = 1  # Por defecto usuario de prueba
@@ -283,7 +302,7 @@ class StoreState(rx.State):
             offset = self.feed_page * self.feed_limit
             
             # Obtener nuevos productos
-            new_products = ProductDataService.get_products_for_store(
+            new_products = ProductManager.get_all_products_formatted(
                 self.user_id, 
                 limit=self.feed_limit, 
                 offset=offset
@@ -364,12 +383,13 @@ class StoreState(rx.State):
             self._popular_products_cache = _GLOBAL_PRODUCTS_CACHE["popular_products"]
             # Categorizar también en cache hit porque _categorized_products es instancia local
             self._categorize_products(self._all_products_cache)
-            self._products_loaded = True
+            self.products_loaded = True
             print(f"🏁 DEBUG: Fin load_products_cached (HIT) - Total: {time.time() - t_start:.4f}s")
             return
 
         # Cache MISS - Cargar de DB
         self.is_loading = True
+        self.products_loaded = False
         self.error_message = ""
         print(f"🔍 GLOBAL Cache MISS - Cargando productos de DB...")
         
@@ -381,7 +401,7 @@ class StoreState(rx.State):
             
             # 1. Cargar TODOS los productos (Single Query)
             # 🚀 format_product_data_for_store ya fue optimizado en ProductManager
-            all_products = ProductDataService.get_products_for_store(self.user_id)
+            all_products = ProductManager.get_all_products_formatted(self.user_id)
             print(f"📡 DB Query 'All Products' terminada en {time.time() - t_db_start:.4f}s")
             
             # 2. Cargar populares
@@ -401,7 +421,7 @@ class StoreState(rx.State):
             # Categorizar
             self._categorize_products(all_products)
             
-            self._products_loaded = True
+            self.products_loaded = True
             
             print(f"✅ Cache Actualizado: {len(all_products)} productos cargados.")
             
