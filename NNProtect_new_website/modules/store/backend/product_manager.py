@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 from database.products import Products
 from database.addresses import Countries
 
-from NNProtect_new_website.modules.auth.state.auth_state import UserDataManager
+from NNProtect_new_website.modules.auth.backend.user_data_service import UserDataService
 
 class ProductManager:
     """
@@ -125,7 +125,7 @@ class ProductManager:
             float: Precio del producto en la moneda del país, None si no existe
         """
         
-        country_str = UserDataManager.get_user_country_by_id(user_id)
+        country_str = UserDataService.get_user_country_by_id(user_id)
         if not country_str:
             return None
         
@@ -158,7 +158,7 @@ class ProductManager:
             int: Puntos de valor del producto
         """
         
-        country_str = UserDataManager.get_user_country_by_id(user_id)
+        country_str = UserDataService.get_user_country_by_id(user_id)
         if not country_str:
             return 0
         
@@ -191,7 +191,7 @@ class ProductManager:
             float: Valor neto del producto, None si no existe
         """
         
-        country_str = UserDataManager.get_user_country_by_id(user_id)
+        country_str = UserDataService.get_user_country_by_id(user_id)
         if not country_str:
             return None
         
@@ -224,7 +224,7 @@ class ProductManager:
             str: Símbolo de la moneda
         """
         
-        country_str = UserDataManager.get_user_country_by_id(user_id)
+        country_str = UserDataService.get_user_country_by_id(user_id)
         if not country_str:
             return "$"
         
@@ -252,7 +252,7 @@ class ProductManager:
         
         # 🚀 OPTIMIZACIÓN: Cargar país y enum UNA sola vez fuera del bucle
         # Esto reduce N consultas a BD (donde N = num productos) a 1 consulta.
-        country_str = UserDataManager.get_user_country_by_id(user_id)
+        country_str = UserDataService.get_user_country_by_id(user_id)
         country_enum = ProductManager._map_country_string_to_enum(country_str)
         
         # Pre-calcular el símbolo de moneda

@@ -17,8 +17,8 @@ def verify_implementation():
         
         # Probar con user_id=1 (asumiendo existe)
         user_id = 1
-        from NNProtect_new_website.modules.auth.state.auth_state import UserDataManager
-        user_country = UserDataManager.get_user_country_by_id(user_id)
+        from NNProtect_new_website.modules.auth.backend.user_data_service import UserDataService
+        user_country = UserDataService.get_user_country_by_id(user_id)
         print(f"   👤 Usuario {user_id} registrado en: {user_country}")
         
         if products:

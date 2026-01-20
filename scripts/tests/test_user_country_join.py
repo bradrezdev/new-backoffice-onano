@@ -9,17 +9,17 @@ sys.path.append('.')
 
 from database.users import Users
 from database.addresses import Countries
-from NNProtect_new_website.modules.auth.state.auth_state import UserDataManager
+from NNProtect_new_website.modules.auth.backend.user_data_service import UserDataService
 
 def test_user_country_join():
     """Test del método get_user_country_by_id"""
     print("🧪 Probando método JOIN para obtener país del usuario...")
     
-        # Test 1: Probar el método estático migrado a UserDataManager
+        # Test 1: Probar el método estático migrado a UserDataService
     try:
         # Simulamos que el usuario ID 1 existe
         user_id = 1
-        country = UserDataManager.get_user_country_by_id(user_id)
+        country = UserDataService.get_user_country_by_id(user_id)
         
         if country:
             print(f"✅ País encontrado para usuario {user_id}: {country.value}")
@@ -29,11 +29,11 @@ def test_user_country_join():
     except Exception as e:
         print(f"⚠️  Error en método estático: {e}")
     
-    # Test 2: Probar método de actualización de cache migrado a UserDataManager
+    # Test 2: Probar método de actualización de cache migrado a UserDataService
     try:
-        # Probar actualización de cache usando UserDataManager
+        # Probar actualización de cache usando UserDataService
         user_id = 1
-        result = UserDataManager.update_user_country_cache(user_id)
+        result = UserDataService.update_user_country_cache(user_id)
         
         if result:
             print(f"✅ Country cache actualizado correctamente para usuario {user_id}")

@@ -38,6 +38,7 @@ from .Admin_app.admin_page import admin_page
 from .components.shared_ui.layout import main_container_derecha, mobile_header, desktop_sidebar, mobile_sidebar, header
 from .components.shared_ui.theme import Custom_theme
 from .status_bar import pwa_meta_tags, wrap_page_with_statusbar  # ← NUEVO IMPORT
+from .utils.auth import require_auth, require_guest
 from rxconfig import config
 
 from .modules.auth.state.auth_state import AuthState
@@ -982,7 +983,6 @@ def index() -> rx.Component:
         ),
         width="100%",                  # Ancho de la ventana
         on_mount=[
-            AuthState.load_user_from_token,
             DashboardState.load_user_stats,
             DashboardState.load_rank_progression,
             DashboardState.load_estimated_monthly_earnings
@@ -1004,44 +1004,44 @@ app = rx.App(
 )
 
 app.add_page(
-    index,
+    require_auth(index),
     title="NN Protect | Dashboard",
     route="/dashboard",
     meta=meta,
 )
 
 # Login y Registro
-app.add_page(login, title="NN Protect | Iniciar sesión", route="/", meta=meta)
-app.add_page(register, title="NN Protect | Nuevo registro", route="/register", meta=meta)
+app.add_page(require_guest(login), title="NN Protect | Iniciar sesión", route="/", meta=meta)
+app.add_page(require_auth(register), title="NN Protect | Nuevo registro", route="/register", meta=meta)
 app.add_page(register_noSponsor, title="NN Protect | Registro sin patrocinador", route="/register_noSponsor", meta=meta)
-app.add_page(welcome_page, title="NN Protect | Bienvenido", route="/welcome", meta=meta)
+app.add_page(require_auth(welcome_page), title="NN Protect | Bienvenido", route="/welcome", meta=meta)
 
 # Servicio de red
-app.add_page(network, title="NN Protect | Red", route="/network", meta=meta)
-app.add_page(network_reports, title="NN Protect | Reportes de Red", route="/network_reports", meta=meta)
-app.add_page(income_reports, title="NN Protect | Reportes de Ingresos", route="/income_reports", meta=meta)
+app.add_page(require_auth(network), title="NN Protect | Red", route="/network", meta=meta)
+app.add_page(require_auth(network_reports), title="NN Protect | Reportes de Red", route="/network_reports", meta=meta)
+app.add_page(require_auth(income_reports), title="NN Protect | Reportes de Ingresos", route="/income_reports", meta=meta)
 
 # Servicio de tienda
-app.add_page(store, title="NN Protect | Tienda", route="/store", meta=meta)
-app.add_page(shopping_cart, title="NN Protect | Carrito de Compras", route="/shopping_cart", meta=meta)
+app.add_page(require_auth(store), title="NN Protect | Tienda", route="/store", meta=meta)
+app.add_page(require_auth(shopping_cart), title="NN Protect | Carrito de Compras", route="/shopping_cart", meta=meta)
 
 # Servicio de órdenes
-app.add_page(orders, title="NN Protect | Órdenes", route="/orders", meta=meta)
-app.add_page(order_details, title="NN Protect | Detalles de Orden", route="/orders/order_details", meta=meta)
-app.add_page(order_confirmation, title="NN Protect | Confirmación de Orden", route="/order_confirmation", meta=meta)
+app.add_page(require_auth(orders), title="NN Protect | Órdenes", route="/orders", meta=meta)
+app.add_page(require_auth(order_details), title="NN Protect | Detalles de Orden", route="/orders/order_details", meta=meta)
+app.add_page(require_auth(order_confirmation), title="NN Protect | Confirmación de Orden", route="/order_confirmation", meta=meta)
 
 # Servicio de retiros
-app.add_page(withdrawals, title="NN Protect | Retiros", route="/withdrawals", meta=meta)
-app.add_page(new_withdrawal, title="NN Protect | Nuevo Retiro", route="/new_withdrawal", meta=meta)
+app.add_page(require_auth(withdrawals), title="NN Protect | Retiros", route="/withdrawals", meta=meta)
+app.add_page(require_auth(new_withdrawal), title="NN Protect | Nuevo Retiro", route="/new_withdrawal", meta=meta)
 
 # Servicio de envíos
-app.add_page(shipment_method, title="NN Protect | Método de Envío", route="/shipment_method", meta=meta)
+app.add_page(require_auth(shipment_method), title="NN Protect | Método de Envío", route="/shipment_method", meta=meta)
 
 # Servicio de pagos
-app.add_page(payment, title="NN Protect | Método de Pago", route="/payment", meta=meta)
+app.add_page(require_auth(payment), title="NN Protect | Método de Pago", route="/payment", meta=meta)
 
 # Admin Panel
-app.add_page(admin_page, title="NN Protect | Admin Panel", route="/admin", meta=meta)
+app.add_page(require_auth(admin_page), title="NN Protect | Admin Panel", route="/admin", meta=meta)
 
 # Inicializar base de datos (crear periodo inicial si no existe)
 initialize_database()
