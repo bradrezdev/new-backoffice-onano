@@ -218,67 +218,83 @@ def order_details() -> rx.Component:
                                             margin_bottom="1em"
                                         ),
 
-                                        # Detalles de la compra
-                                rx.flex(
-                                    rx.flex(
-                                        rx.hstack(
-                                            rx.icon("calendar", size=20, color="#6B7280"),
-                                            rx.text(
-                                                OrderDetailState.order_data['created_at_display'],
-                                                font_size="0.9em",
-                                                color="#6B7280"
+                                        # Detalles de la compra y productos
+                                        rx.vstack(
+                                            # Tarjeta resumen (Desktop)
+                                            rx.flex(
+                                                rx.flex(
+                                                    rx.hstack(
+                                                        rx.icon("calendar", size=20, color="#6B7280"),
+                                                        rx.text(
+                                                            OrderDetailState.order_data['created_at_display'],
+                                                            font_size="0.9em",
+                                                            color="#6B7280"
+                                                        ),
+                                                    ),
+                                                    rx.hstack(
+                                                        rx.icon("map-pinned", size=20, color="#6B7280"),
+                                                        rx.text(
+                                                            OrderDetailState.order_data['address_alias'],
+                                                            font_size="0.9em",
+                                                            color="#6B7280"
+                                                        ),
+                                                    ),
+                                                    rx.hstack(
+                                                        rx.icon("credit-card", size=20, color="#6B7280"),
+                                                        rx.text(
+                                                            OrderDetailState.order_data['payment_method'],
+                                                            font_size="0.9em",
+                                                            color="#6B7280"
+                                                        ),
+                                                    ),
+                                                    rx.hstack(
+                                                        rx.icon("container", size=20, color="#6B7280"),
+                                                        rx.text(
+                                                            "CEDIS: Por definir",
+                                                            font_size="0.9em",
+                                                            color="#6B7280"
+                                                        ),
+                                                    ),
+                                                    spacing="5",
+                                                    direction="row",
+                                                ),
+                                                rx.flex(
+                                                    rx.badge(
+                                                        OrderDetailState.order_data['status'],
+                                                        color_scheme=OrderDetailState.order_data['badge_color'],
+                                                        font_size="0.8em",
+                                                        border_radius="12px",
+                                                        padding="0.2em 1em"
+                                                    ),
+                                                    rx.button(
+                                                        rx.icon("download", size=16),
+                                                        "PDF",
+                                                        variant="outline",
+                                                        color_scheme="blue",
+                                                        font_size="0.8em",
+                                                        border_radius="24px",
+                                                    ),
+                                                    spacing="3",
+                                                    direction="column",
+                                                ),
+                                                justify="between",
+                                                direction="row",
+                                                margin_bottom="3em",
+                                                width="100%"
                                             ),
-                                        ),
-                                        rx.hstack(
-                                            rx.icon("map-pinned", size=20, color="#6B7280"),
-                                            rx.text(
-                                                OrderDetailState.order_data['address_alias'],
-                                                font_size="0.9em",
-                                                color="#6B7280"
+                                            
+                                            # Lista de productos (Iterador)
+                                            rx.vstack(
+                                                rx.foreach(
+                                                    OrderDetailState.order_items,
+                                                    product_row_desktop
+                                                ),
+                                                width="100%",
+                                                spacing="4"
                                             ),
+                                            
+                                            width="100%"
                                         ),
-                                        rx.hstack(
-                                            rx.icon("credit-card", size=20, color="#6B7280"),
-                                            rx.text(
-                                                OrderDetailState.order_data['payment_method'],
-                                                font_size="0.9em",
-                                                color="#6B7280"
-                                            ),
-                                        ),
-                                        rx.hstack(
-                                            rx.icon("container", size=20, color="#6B7280"),
-                                            rx.text(
-                                                "CEDIS: Por definir",
-                                                font_size="0.9em",
-                                                color="#6B7280"
-                                            ),
-                                        ),
-                                        spacing="5",
-                                        direction="row",
-                                    ),
-                                    rx.flex(
-                                        rx.badge(
-                                            OrderDetailState.order_data['status'],
-                                            color_scheme=OrderDetailState.order_data['badge_color'],
-                                            font_size="0.8em",
-                                            border_radius="12px",
-                                            padding="0.2em 1em"
-                                        ),
-                                        rx.button(
-                                            rx.icon("download", size=16),
-                                            "PDF",
-                                            variant="outline",
-                                            color_scheme="blue",
-                                            font_size="0.8em",
-                                            border_radius="24px",
-                                        ),
-                                        spacing="3",
-                                        direction="column",
-                                    ),
-                                    justify="between",
-                                    direction="row",
-                                    margin_bottom="3em"
-                                ),
 
                                 # Estado del pedido
                                 rx.flex(

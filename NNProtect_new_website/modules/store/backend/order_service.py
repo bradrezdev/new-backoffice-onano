@@ -53,6 +53,28 @@ class OrderService:
                 for order, address in results:
                     # Formatear cada orden
                     formatted_order = OrderService._format_order(order, address)
+
+                    # Obtener productos de la orden para el resumen (Optimización N+1 aceptable por paginación pequeña)
+                    items_statement = (
+                        select(OrderItems, Products)
+                        .join(Products, OrderItems.product_id == Products.id)
+                        .where(OrderItems.order_id == order.id)
+                    )
+                    items_results = session.exec(items_statement).all()
+                    
+                    products_list = []
+                    summary_lines = []
+                    
+                    for item, product in items_results:
+                        products_list.append({
+                            "name": product.product_name,
+                            "quantity": item.quantity
+                        })
+                        summary_lines.append(f"{item.quantity}x {product.product_name}")
+                    
+                    formatted_order["products"] = products_list
+                    formatted_order["products_summary"] = "\n".join(summary_lines) if summary_lines else "Sin productos"
+
                     orders.append(formatted_order)
 
                 return orders
@@ -154,6 +176,28 @@ class OrderService:
                 orders = []
                 for order, address in results:
                     formatted_order = OrderService._format_order(order, address)
+                    
+                    # Obtener productos de la orden para el resumen
+                    items_statement = (
+                        select(OrderItems, Products)
+                        .join(Products, OrderItems.product_id == Products.id)
+                        .where(OrderItems.order_id == order.id)
+                    )
+                    items_results = session.exec(items_statement).all()
+                    
+                    products_list = []
+                    summary_lines = []
+                    
+                    for item, product in items_results:
+                        products_list.append({
+                            "name": product.product_name,
+                            "quantity": item.quantity
+                        })
+                        summary_lines.append(f"{item.quantity}x {product.product_name}")
+                    
+                    formatted_order["products"] = products_list
+                    formatted_order["products_summary"] = "\n".join(summary_lines) if summary_lines else "Sin productos"
+                    
                     orders.append(formatted_order)
 
                 return orders
@@ -195,6 +239,28 @@ class OrderService:
                 for order, address in results:
                     if search_lower in str(order.id).lower():
                         formatted_order = OrderService._format_order(order, address)
+
+                        # Obtener productos de la orden para el resumen
+                        items_statement = (
+                            select(OrderItems, Products)
+                            .join(Products, OrderItems.product_id == Products.id)
+                            .where(OrderItems.order_id == order.id)
+                        )
+                        items_results = session.exec(items_statement).all()
+                        
+                        products_list = []
+                        summary_lines = []
+                        
+                        for item, product in items_results:
+                            products_list.append({
+                                "name": product.product_name,
+                                "quantity": item.quantity
+                            })
+                            summary_lines.append(f"{item.quantity}x {product.product_name}")
+                        
+                        formatted_order["products"] = products_list
+                        formatted_order["products_summary"] = "\n".join(summary_lines) if summary_lines else "Sin productos"
+
                         orders.append(formatted_order)
 
                 return orders
@@ -233,14 +299,33 @@ class OrderService:
         submitted_at_mx = convert_to_mexico_time(order.submitted_at) if order.submitted_at else None
         payment_confirmed_at_mx = convert_to_mexico_time(order.payment_confirmed_at) if order.payment_confirmed_at else None
 
-        # Formatear fecha de compra (para display)
-        purchase_date = created_at_mx.strftime("%d/%m/%Y") if created_at_mx else "N/A"
+        # Formatear fecha de compra (para display) con hora
+        purchase_date = created_at_mx.strftime("%d/%m/%Y %H:%M") if created_at_mx else "N/A"
 
         # Determinar estado para UI con badge color
         status_display, badge_color = OrderService._get_status_display(order.status)
 
         # Determinar método de pago con icono
         payment_method, payment_icon = OrderService._get_payment_method_display(order.payment_method)
+
+        # Derivar estados separados para UI móvil
+        payment_status = "Pendiente"
+        shipping_status = "Pendiente"
+
+        # Lógica simplificada basada en el estado principal
+        if order.status in [OrderStatus.PAYMENT_CONFIRMED.value, OrderStatus.PROCESSING.value, OrderStatus.SHIPPED.value, OrderStatus.DELIVERED.value]:
+            payment_status = "Pagado"
+        elif order.status == OrderStatus.CANCELLED.value:
+            payment_status = "Cancelado"
+        
+        if order.status == OrderStatus.SHIPPED.value:
+            shipping_status = "Enviado"
+        elif order.status == OrderStatus.DELIVERED.value:
+            shipping_status = "Entregado" 
+        elif order.status == OrderStatus.CANCELLED.value:
+            shipping_status = "Cancelado"
+        elif order.status == OrderStatus.PROCESSING.value:
+            shipping_status = "En preparación"
 
         return {
             "order_id": order.id,
@@ -257,6 +342,8 @@ class OrderService:
             "status": status_display,
             "status_raw": order.status,
             "badge_color": badge_color,
+            "shipping_status": shipping_status,
+            "payment_status": payment_status,
             "total_pv": order.total_pv,
             "total_vn": float(order.total_vn),
             # Raw timestamps para sorting
@@ -307,9 +394,9 @@ class OrderService:
         """
         status_map = {
             OrderStatus.DRAFT.value: ("Borrador", "gray"),
-            OrderStatus.PENDING_PAYMENT.value: ("Pendiente", "orange"),
-            OrderStatus.PAYMENT_CONFIRMED.value: ("Pagado", "green"),
-            OrderStatus.PROCESSING.value: ("En proceso", "blue"),
+            OrderStatus.PENDING_PAYMENT.value: ("Pendiente de pago", "orange"),
+            OrderStatus.PAYMENT_CONFIRMED.value: ("Pagado / En proceso", "green"),
+            OrderStatus.PROCESSING.value: ("Pagado / En proceso", "blue"),
             OrderStatus.SHIPPED.value: ("Enviado", "cyan"),
             OrderStatus.DELIVERED.value: ("Entregado", "green"),
             OrderStatus.CANCELLED.value: ("Cancelado", "red"),

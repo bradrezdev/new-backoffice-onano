@@ -8,6 +8,7 @@ from ....components.shared_ui.layout import main_container_derecha, mobile_heade
 
 # Importar OrderState
 from ..state.orders_state import OrderState
+from ..state.orders_state import OrderDetailState
 
 
 # ============================================================================
@@ -49,12 +50,13 @@ def get_status_color_scheme(status) -> rx.Component:
 	"""
 	return rx.match(
 		status,
-		("Pendiente", "orange"),
-		("En proceso", "blue"),
+		("Pendiente de pago", "orange"),
+		("Pagado / En proceso", "blue"),
 		("Enviado", "cyan"),
 		("En camino", "yellow"),
 		("Entregado", "green"),
 		("Cancelado", "red"),
+		("Reembolsado", "red"),
 		"gray"  # default
 	)
 
@@ -200,24 +202,15 @@ def mobile_order_card(order: dict) -> rx.Component:
 			# Header: Número de orden y badges
 			rx.flex(
 				rx.text(
-					f"#{order['order_number']}",
+					f"{order['order_number']}",
 					font_weight="bold",
 					font_size="1.25em"
 				),
-				rx.hstack(
-					rx.badge(
-						order['shipping_status'],
-						color_scheme=get_status_color_scheme(order['shipping_status']),
-						size="2",
-						radius="full"
-					),
-					rx.badge(
-						order['payment_status'],
-						color_scheme=get_status_color_scheme(order['payment_status']),
-						size="2",
-						radius="full"
-					),
-					spacing="1"
+				rx.badge(
+					OrderDetailState.order_data['status'],
+					color_scheme=OrderDetailState.order_data['badge_color'],
+					size="2",
+					radius="full"
 				),
 				width="100%",
 				align="center",
@@ -391,7 +384,7 @@ def orders() -> rx.Component:
 
 								# Filtros adicionales
 								rx.select(
-									["Todas", "Pendiente", "En proceso", "Enviado", "Entregado", "Cancelado"],
+									["Todas", "Pendiente de pago", "Pagado / En proceso", "Enviado", "Entregado", "Cancelado"],
 									placeholder="Estado",
 									default_value="Todas",
 									radius="large",
@@ -576,7 +569,7 @@ def orders() -> rx.Component:
 					# Filtros móvil
 					rx.hstack(
 						rx.select(
-							["Todas", "Pendiente", "En proceso", "Enviado", "Entregado", "Cancelado"],
+							["Todas", "Pendiente de pago", "Pagado / En proceso", "Enviado", "Entregado", "Cancelado"],
 							placeholder="Estado",
 							default_value="Todas",
 							size="2",
@@ -646,5 +639,5 @@ def orders() -> rx.Component:
 		#position="absolute",
 		width="100%",
 		height="100%",
-		on_mount=OrderState.load_orders
+		on_mount=OrderState.on_load
 	)

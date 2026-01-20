@@ -166,6 +166,38 @@ categorias_data = [
 ]
 
 
+def product_card_skeleton(item: int) -> rx.Component:
+    """Skeleton loading state for product cards"""
+    return rx.box(
+        rx.vstack(
+            rx.box(
+                width="100%", height="120px", bg="rgba(0,0,0,0.05)", border_radius="12px"
+            ),
+            rx.box(
+                width="80%", height="1em", bg="rgba(0,0,0,0.05)", border_radius="4px"
+            ),
+            rx.box(
+                width="40%", height="1em", bg="rgba(0,0,0,0.05)", border_radius="4px"
+            ),
+            rx.box(
+                width="100%", height="32px", bg="rgba(0,0,0,0.05)", border_radius="8px"
+            ),
+            spacing="3",
+            align="center",
+            width="100%"
+        ),
+        bg=rx.color_mode_cond(
+            light=Custom_theme().light_colors()["tertiary"],
+            dark=Custom_theme().dark_colors()["tertiary"]
+        ),
+        border_radius="16px",
+        padding="1em",
+        width="100%",
+        min_width="280px",
+        style={"animation": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"}
+    )
+
+
 def store() -> rx.Component:
     # Welcome Page (Index)
     # Cargar productos al inicializar la página
@@ -214,41 +246,80 @@ def store() -> rx.Component:
 
                         # ---------- POPULARES DEL MES ----------
                         rx.text("Populares del mes", font_size="1.7rem", font_weight="bold", margin_bottom="0.7em"),
-                        rx.grid(
-                            rx.foreach(
-                                StoreState.popular_products,
-                                product_card_desktop
+                        rx.cond(
+                            ~StoreState.products_loaded,
+                            rx.grid(
+                                rx.foreach(
+                                    StoreState.skeleton_list,
+                                    product_card_skeleton
+                                ),
+                                columns="4",
+                                spacing="4",
+                                width="100%",
+                                padding="32px",
+                                bg=rx.color_mode_cond(
+                                    light=Custom_theme().light_colors()["tertiary"],
+                                    dark=Custom_theme().dark_colors()["tertiary"]
+                                ),
+                                border_radius="64px",
+                                margin_bottom="32px",
                             ),
-                            columns="4",
-                            spacing="4",
-                            width="100%",
-                            padding="32px",
-                            bg=rx.color_mode_cond(
-                                light=Custom_theme().light_colors()["tertiary"],
-                                dark=Custom_theme().dark_colors()["tertiary"]
-                            ),
-                            border_radius="64px",
-                            margin_bottom="32px",
+                            rx.grid(
+                                rx.foreach(
+                                    StoreState.popular_products,
+                                    product_card_desktop
+                                ),
+                                columns="4",
+                                spacing="4",
+                                width="100%",
+                                padding="32px",
+                                bg=rx.color_mode_cond(
+                                    light=Custom_theme().light_colors()["tertiary"],
+                                    dark=Custom_theme().dark_colors()["tertiary"]
+                                ),
+                                border_radius="64px",
+                                margin_bottom="32px",
+                            )
                         ),
 
                         # ---------- PRODUCTOS ----------
                         rx.text("Productos", font_size="1.7rem", font_weight="bold", margin_bottom="0.7em"),
-                        rx.grid(
-                            rx.foreach(
-                                StoreState.products_feed,
-                                product_card_desktop
+                        rx.cond(
+                            ~StoreState.products_loaded,
+                            rx.grid(
+                                rx.foreach(
+                                    StoreState.skeleton_list,
+                                    product_card_skeleton
+                                ),
+                                columns="4",
+                                spacing="4",
+                                width="100%",
+                                padding="32px",
+                                bg=rx.color_mode_cond(
+                                    light=Custom_theme().light_colors()["tertiary"],
+                                    dark=Custom_theme().dark_colors()["tertiary"]
+                                ),
+                                border_radius="64px",
+                                min_width="240px",
+                                min_height="275px",
                             ),
-                            columns="4",
-                            spacing="4",
-                            width="100%",
-                            padding="32px",
-                            bg=rx.color_mode_cond(
-                                light=Custom_theme().light_colors()["tertiary"],
-                                dark=Custom_theme().dark_colors()["tertiary"]
-                            ),
-                            border_radius="64px",
-                            min_width="240px",
-                            min_height="275px",
+                            rx.grid(
+                                rx.foreach(
+                                    StoreState.products_feed,
+                                    product_card_desktop
+                                ),
+                                columns="4",
+                                spacing="4",
+                                width="100%",
+                                padding="32px",
+                                bg=rx.color_mode_cond(
+                                    light=Custom_theme().light_colors()["tertiary"],
+                                    dark=Custom_theme().dark_colors()["tertiary"]
+                                ),
+                                border_radius="64px",
+                                min_width="240px",
+                                min_height="275px",
+                            )
                         ),
                         # Load More - Infinite Scroll Implementation
                         rx.cond(
@@ -322,14 +393,26 @@ def store() -> rx.Component:
                     rx.box(
                         rx.scroll_area(
                             # Contenedor horizontal de las tarjetas con productos reales
-                            rx.hstack(
-                                rx.foreach(
-                                    StoreState.latest_products,  # ✅ Lista de productos nuevos
-                                    new_products_card            # ✅ Componente que recibe 1 producto
+                            rx.cond(
+                                ~StoreState.products_loaded,
+                                rx.hstack(
+                                    rx.foreach(
+                                        StoreState.skeleton_list,
+                                        product_card_skeleton
+                                    ),
+                                    margin_right="1em",
+                                    spacing="4",
+                                    align="start"
                                 ),
-                                margin_right="1em",
-                                spacing="4",
-                                align="start"
+                                rx.hstack(
+                                    rx.foreach(
+                                        StoreState.latest_products,  # ✅ Lista de productos nuevos
+                                        new_products_card            # ✅ Componente que recibe 1 producto
+                                    ),
+                                    margin_right="1em",
+                                    spacing="4",
+                                    align="start"
+                                )
                             ),
 
                             # Configuración del scroll area
@@ -385,14 +468,26 @@ def store() -> rx.Component:
                     rx.box(
                         rx.scroll_area(
                             # Contenedor horizontal de las tarjetas
-                            rx.hstack(
-                                rx.foreach(
-                                    StoreState.popular_products,  # ✅ Lista de productos populares
-                                    most_requested_products_card
+                            rx.cond(
+                                ~StoreState.products_loaded,
+                                rx.hstack(
+                                    rx.foreach(
+                                        StoreState.skeleton_list,
+                                        product_card_skeleton
+                                    ),
+                                    spacing="4", 
+                                    align="start",
+                                    margin_right="1em",
                                 ),
-                                spacing="4", 
-                                align="start",
-                                margin_right="1em",
+                                rx.hstack(
+                                    rx.foreach(
+                                        StoreState.popular_products,  # ✅ Lista de productos populares
+                                        most_requested_products_card
+                                    ),
+                                    spacing="4", 
+                                    align="start",
+                                    margin_right="1em",
+                                )
                             ),
 
                             # Configuración del scroll area
@@ -444,41 +539,71 @@ def store() -> rx.Component:
                     rx.spacer(id="suplementos", margin_bottom="4em"),  # Espaciador para el scroll
                     # Grid de productos móvil
                     rx.text("Suplementos", size="5", font_weight="bold", padding_x="1em"),
-                    rx.grid(
-                        rx.foreach(
-                            StoreState.supplement_products,  # ✅ Lista de productos de suplementos
-                            supplement_products_card
+                    rx.cond(
+                        ~StoreState.products_loaded,
+                        rx.grid(
+                            rx.foreach(StoreState.skeleton_list, product_card_skeleton),
+                            columns="2",
+                            spacing="3",
+                            width="100%",
+                            padding="0 1em",
                         ),
-                        columns="2",
-                        spacing="3",
-                        width="100%",
-                        padding="0 1em",
+                        rx.grid(
+                            rx.foreach(
+                                StoreState.supplement_products,  # ✅ Lista de productos de suplementos
+                                supplement_products_card
+                            ),
+                            columns="2",
+                            spacing="3",
+                            width="100%",
+                            padding="0 1em",
+                        )
                     ),
                     rx.spacer(id="cuidado_piel", margin_bottom="4em"),  # Espaciador para el scroll
                     # Grid de productos skin care móvil
                     rx.text("Cuidado de la piel", size="5", font_weight="bold", padding_x="1em"),
-                    rx.grid(
-                        rx.foreach(
-                            StoreState.skincare_products,  # ✅ Lista de productos de cuidado de la piel
-                            skincare_products_card
+                    rx.cond(
+                        ~StoreState.products_loaded,
+                        rx.grid(
+                            rx.foreach(StoreState.skeleton_list, product_card_skeleton),
+                            columns="2",
+                            spacing="3",
+                            width="100%",
+                            padding="0 1em",
                         ),
-                        columns="2",
-                        spacing="3",
-                        width="100%",
-                        padding="0 1em",
+                        rx.grid(
+                            rx.foreach(
+                                StoreState.skincare_products,  # ✅ Lista de productos de cuidado de la piel
+                                skincare_products_card
+                            ),
+                            columns="2",
+                            spacing="3",
+                            width="100%",
+                            padding="0 1em",
+                        )
                     ),
                     rx.spacer(id="desinfectantes", margin_bottom="4em"),  # Espaciador para el scroll
                     # Grid de productos móvil
                     rx.text("Desinfectantes", size="5", font_weight="bold", padding_x="1em"),
-                    rx.grid(
-                        rx.foreach(
-                            StoreState.sanitize_products,  # ✅ Lista de productos de desinfectantes
-                            sanitized_products_card,
+                    rx.cond(
+                        ~StoreState.products_loaded,
+                        rx.grid(
+                            rx.foreach(StoreState.skeleton_list, product_card_skeleton),
+                            columns="2",
+                            spacing="3",
+                            width="100%",
+                            padding="0 1em",
                         ),
-                        columns="2",
-                        spacing="3",
-                        width="100%",
-                        padding="0 1em",
+                        rx.grid(
+                            rx.foreach(
+                                StoreState.sanitize_products,  # ✅ Lista de productos de desinfectantes
+                                sanitized_products_card,
+                            ),
+                            columns="2",
+                            spacing="3",
+                            width="100%",
+                            padding="0 1em",
+                        )
                     ),
                     spacing="4",
                     width="100%",
