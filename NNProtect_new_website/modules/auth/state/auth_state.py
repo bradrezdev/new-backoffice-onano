@@ -300,6 +300,7 @@ class AuthState(rx.State):
     # Secure=True solo en producción para evitar problemas en localhost/Safari.
     # Corrigiendo definición de cookie para evitar SyntaxError y argumentos no soportados
     auth_token: str = rx.Cookie("")
+    local_token: str = rx.LocalStorage("")
     
     # Datos de usuario
     logged_user_data: dict = {}
@@ -631,6 +632,7 @@ class AuthState(rx.State):
                 async with self:
                     self.is_logged_in = True
                     self.auth_token = token  # 🔑 GUARDAR TOKEN EN COOKIE
+                    self.local_token = token # 💾 BACKUP EN LOCALSTORAGE (Mobile persistence fix)
                     self.logged_user_data = {
                         "id": complete_user_data["id"],
                         "username": f"{complete_user_data['firstname']} {complete_user_data['lastname']}".strip(),
@@ -649,17 +651,30 @@ class AuthState(rx.State):
                     
                     
                     # 🔧 SAFARI FIX: Forzar escritura de cookie mediante JS
-                    # Safari y algunos navegadores pueden no persistir rx.Cookie inmediatamente en recargas
+                    # Safari y algunos navegadores pueden no persistir rx.Cookie inmediatamente en recargas.
+                    # Movemos el redirect AQUÍ para asegurar que la cookie se escriba antes de navegar.
                     yield rx.call_script(f"""
                         (function() {{
+                            var token = "{token}";
                             var isSecure = window.location.protocol === 'https:';
-                            document.cookie = "auth_token={token}; path=/; samesite=lax; max-age=86400" + (isSecure ? "; secure" : "");
-                            console.log('🍪 Cookie auth_token forzada via JS (Safari fix)');
+                            var date = new Date();
+                            date.setTime(date.getTime() + (24*60*60*1000));
+                            var expires = "; expires=" + date.toUTCString();
+                            
+                            // Cookie
+                            document.cookie = "auth_token=" + token + "; path=/; samesite=lax; max-age=86400" + expires + (isSecure ? "; secure" : "");
+                            
+                            // LocalStorage Backup
+                            localStorage.setItem("auth_token", token);
+                            
+                            console.log('🍪 Cookie + LS auth_token set. Redirecting in 600ms...');
+                            setTimeout(function() {{
+                                window.location.href = "/dashboard";
+                            }}, 600);
                         }})();
                     """)
                     
                     self.is_loading = False
-                    yield rx.redirect("/dashboard")
                 
                 t_after_session = time.time()
                 session_time = t_after_session - t_before_session
@@ -895,6 +910,12 @@ class AuthState(rx.State):
     @rx.event
     def load_user_from_token(self):
         """Carga datos del usuario desde token."""
+        
+        # 📱 MOBILE FIX: Si no hay cookie, intentar recuperar de LocalStorage
+        if not self.auth_token and self.local_token:
+            print(f"🔄 Recuperando sesión desde LocalStorage (Len: {len(self.local_token)})")
+            self.auth_token = self.local_token
+            
         # Se elimina el logging ruidoso. Si no hay token, simplemente retornamos sin error.
         if not self.auth_token:
             self.is_logged_in = False
@@ -992,10 +1013,38 @@ class AuthState(rx.State):
         Verifica que el usuario esté autenticado antes de cargar una página protegida.
         Si la validación falla, redirige al login.
         """
+        print(f"DEBUG: AuthToken: {self.auth_token}, LocalToken: {self.local_token}")
+        
+        # ⚠️ FIX RACE CONDITION: Wait for hydration
+        if not self.auth_token and not self.local_token:
+             print("⏳ Esperando hidratación de LocalSoftware...")
+             await asyncio.sleep(0.5)
+        
+        if not self.auth_token and not self.local_token:
+             yield rx.call_script("console.log('Backend sees no tokens')")
+
+        # 0. Recuperación Belt & Suspenders (LocalStorage -> Cookie)
+        if not self.auth_token and self.local_token:
+            print(f"♻️ Recuperando sesión desde LocalStorage (Token len: {len(self.local_token)})")
+            self.auth_token = self.local_token
+            # Re-inyectar cookie
+            yield rx.call_script(f"""
+                (function() {{
+                    var token = "{self.local_token}";
+                    var isSecure = window.location.protocol === 'https:';
+                    var date = new Date();
+                    date.setTime(date.getTime() + (24*60*60*1000));
+                    var expires = "; expires=" + date.toUTCString();
+                    document.cookie = "auth_token=" + token + "; path=/; samesite=lax; max-age=86400" + expires + (isSecure ? "; secure" : "");
+                    console.log('🍪 Cookie restaurada desde LocalStorage backup.');
+                }})();
+            """)
+
         # 1. Verificar existencia del token
         if not self.auth_token:
             print("🚫 Acceso denegado: No hay token. Redirigiendo a Login.")
-            return rx.redirect("/")
+            yield rx.redirect("/")
+            return
             
         # 2. Verificar validez del token (firma y expiración)
         payload = AuthService.decode_jwt_token(self.auth_token)
@@ -1004,7 +1053,8 @@ class AuthState(rx.State):
             # Limpieza básica
             self.auth_token = ""
             self.is_logged_in = False
-            return rx.redirect("/")
+            yield rx.redirect("/")
+            return
             
         # 3. Asegurar que los datos del usuario estén cargados en estado
         if not self.is_logged_in:
@@ -1012,7 +1062,8 @@ class AuthState(rx.State):
             # Si después de intentar cargar, sigue sin estar logueado (ej. usuario borrado de DB)
             if not self.is_logged_in:
                 print("🚫 Acceso denegado: Usuario no encontrado en DB. Redirigiendo a Login.")
-                return rx.redirect("/")
+                yield rx.redirect("/")
+                return
                 
         # 4. (Opcional) Verificar roles si se requiere
         # ...
@@ -1050,11 +1101,6 @@ class AuthState(rx.State):
             success = SupabaseAuthManager.sign_out_user()
             if success:
                 print("✅ Logout de Supabase completado")
-                # 🔧 SAFARI FIX: Forzar limpieza de cookie via JS
-                yield rx.call_script("""
-                    document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-                    console.log('🍪 Cookie auth_token limpiada via JS');
-                """)
             else:
                 print("⚠️ No se pudo hacer logout de Supabase")
         except Exception as e:
@@ -1063,12 +1109,27 @@ class AuthState(rx.State):
         
         # ✅ LIMPIAR ESTADO LOCAL
         self.auth_token = ""
+        self.local_token = ""
         self.is_logged_in = False
         self.logged_user_data = {}
         self.profile_data = {}
         
         print("🎉 Logout híbrido completado")
-        yield rx.redirect("/", replace=True)
+        
+        # 🔧 SAFARI FIX: Forzar limpieza de cookie via JS
+        yield rx.call_script("""
+            (function() {
+                var isSecure = window.location.protocol === 'https:';
+                document.cookie = "auth_token=; path=/; samesite=lax; expires=Thu, 01 Jan 1970 00:00:01 GMT" + (isSecure ? "; secure" : "");
+                
+                localStorage.removeItem("auth_token");
+
+                console.log('🍪 Cookie auth_token cleaned. Redirecting...');
+                setTimeout(function() {
+                    window.location.href = "/";
+                }, 100);
+            })();
+        """)
 
     @rx.event
     def clear_login_form(self):
