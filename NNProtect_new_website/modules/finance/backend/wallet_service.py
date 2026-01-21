@@ -45,7 +45,6 @@ class WalletService:
             ).first()
 
             if existing_wallet:
-                print(f"⚠️  Usuario {member_id} ya tiene una wallet (ID: {existing_wallet.id})")
                 return existing_wallet.id
 
             # Crear nueva wallet
@@ -59,13 +58,9 @@ class WalletService:
             session.add(wallet)
             session.flush()
 
-            print(f"✅ Wallet creada para usuario {member_id} (ID: {wallet.id})")
             return wallet.id
 
-        except Exception as e:
-            print(f"❌ Error creando wallet para usuario {member_id}: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
             return None
 
     @classmethod
@@ -87,8 +82,7 @@ class WalletService:
 
             return wallet.balance if wallet else None
 
-        except Exception as e:
-            print(f"❌ Error obteniendo balance de usuario {member_id}: {e}")
+        except Exception:
             return None
 
     @classmethod
@@ -117,27 +111,25 @@ class WalletService:
             True si se completó exitosamente, False si falló
         """
         try:
-            # 1. Obtener wallet
+            # 1. Obtener wallet con bloqueo para evitar Race Conditions
             wallet = session.exec(
-                sqlmodel.select(Wallets).where(Wallets.member_id == member_id)
+                sqlmodel.select(Wallets)
+                .where(Wallets.member_id == member_id)
+                .with_for_update()
             ).first()
 
             if not wallet:
-                print(f"❌ No existe wallet para usuario {member_id}")
                 return False
 
             if wallet.status != WalletStatus.ACTIVE.value:
-                print(f"❌ Wallet de usuario {member_id} no está activa (status: {wallet.status})")
                 return False
 
             # 2. Verificar que la comisión existe y está PENDING
             commission = session.get(Commissions, commission_id)
             if not commission:
-                print(f"❌ Comisión {commission_id} no existe")
                 return False
 
             if commission.status != CommissionStatus.PENDING.value:
-                print(f"⚠️  Comisión {commission_id} ya fue procesada (status: {commission.status})")
                 return False
 
             # 3. Crear transacción de wallet
@@ -171,13 +163,9 @@ class WalletService:
 
             session.flush()
 
-            print(f"✅ Comisión #{commission_id} depositada en wallet de usuario {member_id}: +{amount} {currency}")
             return True
 
-        except Exception as e:
-            print(f"❌ Error depositando comisión {commission_id} a usuario {member_id}: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
             return False
 
     @classmethod
@@ -204,23 +192,22 @@ class WalletService:
             True si se completó exitosamente, False si falló
         """
         try:
-            # 1. Obtener wallet
+            # 1. Obtener wallet con bloqueo
             wallet = session.exec(
-                sqlmodel.select(Wallets).where(Wallets.member_id == member_id)
+                sqlmodel.select(Wallets)
+                .where(Wallets.member_id == member_id)
+                .with_for_update()
             ).first()
 
             if not wallet:
-                print(f"❌ No existe wallet para usuario {member_id}")
                 return False
 
             # 2. Verificar que wallet esté ACTIVE
             if wallet.status != WalletStatus.ACTIVE.value:
-                print(f"❌ Wallet de usuario {member_id} no está activa (status: {wallet.status})")
                 return False
 
             # 3. Verificar balance suficiente
             if not wallet.has_sufficient_balance(amount):
-                print(f"❌ Balance insuficiente: tiene {wallet.balance} {currency}, necesita {amount} {currency}")
                 return False
 
             # 3. Crear transacción de débito
@@ -250,13 +237,9 @@ class WalletService:
 
             session.flush()
 
-            print(f"✅ Orden #{order_id} pagada con wallet de usuario {member_id}: -{amount} {currency}")
             return True
 
-        except Exception as e:
-            print(f"❌ Error pagando orden {order_id} con wallet de usuario {member_id}: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
             return False
 
     @classmethod
@@ -285,22 +268,26 @@ class WalletService:
             True si se completó exitosamente, False si falló
         """
         try:
-            # 1. Obtener ambas wallets
-            wallet_from = session.exec(
-                sqlmodel.select(Wallets).where(Wallets.member_id == from_member_id)
+            # 1. Obtener ambas wallets con bloqueo.
+            # Ordenar por ID para evitar Deadlocks
+            first_id, second_id = sorted([from_member_id, to_member_id])
+
+            first_wallet = session.exec(
+                sqlmodel.select(Wallets).where(Wallets.member_id == first_id).with_for_update()
             ).first()
 
-            wallet_to = session.exec(
-                sqlmodel.select(Wallets).where(Wallets.member_id == to_member_id)
+            second_wallet = session.exec(
+                sqlmodel.select(Wallets).where(Wallets.member_id == second_id).with_for_update()
             ).first()
-
-            if not wallet_from or not wallet_to:
-                print(f"❌ Una o ambas wallets no existen")
+            
+            if not first_wallet or not second_wallet:
                 return False
+                
+            wallet_from = first_wallet if first_wallet.member_id == from_member_id else second_wallet
+            wallet_to = second_wallet if second_wallet.member_id == to_member_id else first_wallet
 
             # 2. Verificar balance suficiente
             if not wallet_from.has_sufficient_balance(amount):
-                print(f"❌ Balance insuficiente en wallet origen")
                 return False
 
             # 3. Crear transacción OUT (usuario que envía)
@@ -354,13 +341,9 @@ class WalletService:
 
             session.flush()
 
-            print(f"✅ Transferencia exitosa: {from_member_id} -> {to_member_id}: {amount} {currency}")
             return True
 
-        except Exception as e:
-            print(f"❌ Error en transferencia {from_member_id} -> {to_member_id}: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
             return False
 
     @classmethod
@@ -391,21 +374,25 @@ class WalletService:
             ID de solicitud de retiro o None si falla
         """
         try:
-            # 1. Obtener wallet
+            # 1. Obtener wallet con bloqueo
             wallet = session.exec(
-                sqlmodel.select(Wallets).where(Wallets.member_id == member_id)
+                sqlmodel.select(Wallets)
+                .where(Wallets.member_id == member_id)
+                .with_for_update()
             ).first()
 
             if not wallet:
-                print(f"❌ No existe wallet para usuario {member_id}")
                 return None
 
-            # 2. Verificar balance suficiente
+            # 2. Verificar que la moneda coincida con la wallet original
+            if wallet.currency != currency:
+                return None
+
+            # 3. Verificar balance suficiente
             if not wallet.has_sufficient_balance(amount):
-                print(f"❌ Balance insuficiente para retiro")
                 return None
 
-            # 3. Crear transacción de wallet (PENDING)
+            # 4. Crear transacción de wallet (PENDING)
             transaction_uuid = str(uuid.uuid4())
             balance_before = wallet.balance
             balance_after = balance_before - amount
@@ -425,7 +412,7 @@ class WalletService:
             session.add(transaction)
             session.flush()
 
-            # 4. Crear registro de retiro
+            # 5. Crear registro de retiro
             withdrawal = WalletWithdrawals(
                 member_id=member_id,
                 wallet_transaction_id=transaction.id,
@@ -439,19 +426,15 @@ class WalletService:
 
             session.add(withdrawal)
 
-            # 5. Actualizar balance de wallet
+            # 6. Actualizar balance de wallet
             wallet.balance = balance_after
             wallet.updated_at = datetime.now(timezone.utc)
 
             session.flush()
 
-            print(f"✅ Solicitud de retiro creada para usuario {member_id}: {amount} {currency} (ID: {withdrawal.id})")
             return withdrawal.id
 
-        except Exception as e:
-            print(f"❌ Error creando solicitud de retiro para usuario {member_id}: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
             return None
 
     @classmethod
@@ -485,8 +468,7 @@ class WalletService:
 
             return list(transactions)
 
-        except Exception as e:
-            print(f"❌ Error obteniendo historial de transacciones de usuario {member_id}: {e}")
+        except Exception:
             return []
 
     @classmethod
@@ -530,12 +512,8 @@ class WalletService:
 
             session.commit()
 
-            print(f"✅ Procesadas {processed_count}/{len(pending_commissions)} comisiones del período {period_id}")
             return processed_count
 
-        except Exception as e:
-            print(f"❌ Error procesando comisiones del período {period_id}: {e}")
-            import traceback
-            traceback.print_exc()
+        except Exception:
             session.rollback()
             return 0

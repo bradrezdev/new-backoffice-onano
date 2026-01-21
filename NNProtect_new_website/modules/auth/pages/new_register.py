@@ -699,8 +699,6 @@ def register() -> rx.Component:
                             value=AuthState.new_phone_number,
                             on_change=AuthState.set_new_phone_number,
                             type="tel",
-                            input_mode="numeric",
-                            pattern="[0-9]*",
                             border_radius="15px",
                             bg=rx.color_mode_cond(
                                 light=Custom_theme().light_colors()["tertiary"],  # Corregido

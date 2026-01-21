@@ -132,7 +132,7 @@ def login() -> rx.Component:
                             
                             rx.input(
                                 placeholder="Escribe tu correo electrónico",
-                                type="text",
+                                type="email",
                                 value=AuthState.email,
                                 on_change=AuthState.set_email,
                                 required=True,

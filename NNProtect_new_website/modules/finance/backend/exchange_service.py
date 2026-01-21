@@ -61,13 +61,11 @@ class ExchangeService:
             rate = cls._get_exchange_rate(session, from_currency, to_currency, as_of_date)
 
             if rate is None:
-                print(f"⚠️  No se encontró tasa {from_currency} -> {to_currency}, usando 1:1")
                 return amount
 
             return amount * rate
 
-        except Exception as e:
-            print(f"❌ Error convirtiendo {amount} {from_currency} -> {to_currency}: {e}")
+        except Exception:
             return amount
 
     @classmethod
@@ -109,12 +107,11 @@ class ExchangeService:
 
             return exchange_rate.rate if exchange_rate else None
 
-        except Exception as e:
-            print(f"❌ Error obteniendo tasa {from_currency} -> {to_currency}: {e}")
+        except Exception:
             return None
 
     @classmethod
-    def get_country_currency(cls, country_cache: str) -> str:
+    def get_country_currency(cls, country: str) -> str:
         """
         Obtiene el código de moneda para un país.
         Principio KISS: Mapeo simple.
@@ -125,7 +122,7 @@ class ExchangeService:
         Returns:
             Código de moneda (MXN, USD, COP)
         """
-        return cls.COUNTRY_CURRENCIES.get(country_cache, "MXN")
+        return cls.COUNTRY_CURRENCIES.get(country, "MXN")
 
     @classmethod
     def create_exchange_rate(
@@ -170,9 +167,7 @@ class ExchangeService:
             session.add(exchange_rate)
             session.flush()
 
-            print(f"✅ Tasa de cambio creada: 1 {from_currency} = {rate} {to_currency}")
             return exchange_rate.id
 
-        except Exception as e:
-            print(f"❌ Error creando tasa de cambio: {e}")
+        except Exception:
             return None
